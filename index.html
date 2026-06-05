@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Friday Closeout</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Closeout">
+<meta name="theme-color" content="#1A2B2E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --teal:#00818D; --teal-deep:#055a63; --ink:#1A2B2E; --paper:#FBF8F3; --card:#FFFFFF;
+    --warm:#8A7E78; --warm-lt:#B8AEA6; --amber:#C98A1E; --amber-bg:#FFF8EC;
+    --input:#6B6F8A; --input-bg:#F4F4F8; --line:#ECE5DC; --hair:#F3EEE6; --q1:#C5532F;
+    --ok:#2E8B62; --err:#B83A2E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Hanken Grotesk',sans-serif; color:var(--ink); line-height:1.5;
+    background:var(--paper);
+    background-image:radial-gradient(circle at 10% 5%, rgba(0,129,141,.04), transparent 38%);
+    background-attachment:fixed; padding:0; min-height:100vh;
+    padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:840px; margin:0 auto; padding:24px 16px 80px}
+  .fade{opacity:0; transform:translateY(8px); animation:rise .5s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--warm-lt);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
+
+  /* ===== Lock screen ===== */
+  .lock{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;padding:24px;color:#fff}
+  .lock h1{font-family:'Fraunces',serif;font-weight:500;font-size:32px;letter-spacing:-.01em;margin-bottom:6px}
+  .lock h1 b{font-style:italic;font-weight:400;color:#7FC3CB}
+  .lock .sub{color:#9eb7b6;font-size:13px;margin-bottom:26px;text-align:center;max-width:320px}
+  .lock input{font-family:'Fraunces',serif;font-size:32px;width:160px;text-align:center;letter-spacing:.3em;padding:10px;background:rgba(255,255,255,.07);border:1px solid #2a3d3f;color:#fff;border-radius:10px;outline:none}
+  .lock input:focus{border-color:var(--teal)}
+  .lock .err{color:#F0A98A;font-size:12px;margin-top:14px;min-height:18px}
+
+  /* ===== Masthead ===== */
+  .mast{border-bottom:2px solid var(--ink); padding-bottom:14px; position:relative}
+  .kick{font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--teal); font-weight:700}
+  .mast h1{font-family:'Fraunces',serif; font-weight:500; font-size:32px; letter-spacing:-.015em; margin-top:5px}
+  .mast h1 b{font-style:italic; font-weight:400; color:var(--teal)}
+  .sub{font-size:13px; color:var(--warm); margin-top:7px}
+  .gear{position:absolute;top:0;right:0;background:none;border:0;font-size:18px;color:var(--warm);padding:6px;cursor:pointer;border-radius:6px}
+  .gear:hover{background:var(--input-bg);color:var(--ink)}
+
+  /* ===== Action bar ===== */
+  .bar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:18px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+  .barhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+  .barhd .tt{font-family:'Fraunces',serif;font-size:16px;font-weight:600;letter-spacing:-.01em}
+  .barhd .meta{font-size:11px;color:var(--warm)}
+  .barhd .meta b{color:var(--ink);font-weight:600}
+  .barctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  select.hist{font-family:inherit;font-size:12px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);min-width:160px}
+  .drop{border:2px dashed var(--warm-lt);border-radius:11px;padding:18px 16px;text-align:center;cursor:pointer;background:var(--paper);transition:.18s}
+  .drop:hover,.drop.over{border-color:var(--teal);background:rgba(0,129,141,.04)}
+  .drop .ico{font-size:24px;display:block;margin-bottom:5px}
+  .drop .ti{font-size:13px;font-weight:600;color:var(--ink)}
+  .drop .sb{font-size:11px;color:var(--warm);margin-top:3px}
+  .drop.has{border-style:solid;border-color:var(--teal);background:rgba(0,129,141,.06)}
+  .drop input{display:none}
+  .actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  button.go{font-family:inherit;font-size:13px;font-weight:600;padding:9px 16px;border:0;border-radius:9px;cursor:pointer;background:var(--teal);color:#fff;display:inline-flex;align-items:center;gap:7px}
+  button.go:hover:not(:disabled){background:var(--teal-deep)}
+  button.go:disabled{background:var(--warm-lt);cursor:not-allowed}
+  button.go.alt{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  button.go.alt:hover:not(:disabled){border-color:var(--ink);background:var(--paper)}
+  button.go.danger{background:#fff;border:1px solid var(--line);color:var(--q1)}
+  .status{font-size:12px;color:var(--warm);margin-top:8px;min-height:18px}
+  .status.ok{color:var(--ok)} .status.err{color:var(--err)}
+
+  /* ===== Legend ===== */
+  .key{display:flex; gap:8px; flex-wrap:wrap; margin:18px 0 6px}
+  .kc{font-size:11px; font-weight:600; padding:5px 11px; border-radius:20px; display:flex; align-items:center; gap:6px}
+  .kc .d{width:8px;height:8px;border-radius:50%}
+  .k-auto{background:rgba(0,129,141,.09); color:var(--teal-deep)} .k-auto .d{background:var(--teal)}
+  .k-draft{background:var(--amber-bg); color:#8a5e0e} .k-draft .d{background:var(--amber)}
+  .k-you{background:var(--input-bg); color:var(--input)} .k-you .d{background:var(--input)}
+
+  /* ===== Sections ===== */
+  section{margin-top:26px}
+  .sh{display:flex; align-items:baseline; gap:11px; margin-bottom:10px}
+  .sn{font-family:'Fraunces',serif; font-size:15px; color:var(--warm-lt); font-weight:600; min-width:22px}
+  .st{font-family:'Fraunces',serif; font-weight:500; font-size:20px; letter-spacing:-.01em}
+  .sd{font-size:12px; color:var(--warm); margin:-4px 0 12px 33px}
+
+  .cell{border-radius:10px; padding:11px 14px; margin:8px 0; font-size:13.5px; position:relative}
+  .cell .lab{font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; margin-bottom:5px; display:flex; align-items:center; gap:6px}
+  .cell .lab .tag{margin-left:auto; font-size:8.5px; padding:1px 7px; border-radius:20px; letter-spacing:.04em}
+  .auto{background:var(--card); border:1px solid var(--line); border-left:3px solid var(--teal)}
+  .auto .lab{color:var(--teal-deep)} .auto .tag{background:rgba(0,129,141,.1); color:var(--teal-deep)}
+  .draft{background:var(--amber-bg); border:1px solid #F0E2C4; border-left:3px solid var(--amber)}
+  .draft .lab{color:#8a5e0e} .draft .tag{background:#F6E8CC; color:#8a5e0e}
+  .you{background:var(--input-bg); border:1px dashed var(--warm-lt); border-left:3px solid var(--input)}
+  .you .lab{color:var(--input)} .you .tag{background:#E6E6EE; color:var(--input)}
+
+  [contenteditable]{outline:none}
+  [contenteditable]:focus{background:rgba(0,129,141,.04);border-radius:5px}
+  [contenteditable]:empty::before{content:attr(data-placeholder);color:var(--warm-lt);font-style:italic;font-size:12.5px}
+
+  ul.cnt{margin:3px 0 0 2px; list-style:none}
+  ul.cnt li{padding:3px 0 3px 15px; position:relative}
+  ul.cnt li::before{content:"";position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:var(--warm-lt)}
+  ul.cnt li b{font-weight:600}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  @media(max-width:640px){.two{grid-template-columns:1fr}}
+
+  /* Classify chips for §5 */
+  .cl{display:inline-block; font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:1px 7px; border-radius:20px; margin-left:6px}
+  .do{background:rgba(197,83,47,.12); color:var(--q1)}
+  .delegate{background:rgba(0,129,141,.12); color:var(--teal-deep)}
+  .defer{background:#EFEAE2; color:var(--warm)}
+  .elim{background:#eee; color:#999; text-decoration:line-through}
+
+  /* §2 table */
+  table{width:100%; border-collapse:collapse; font-size:12.5px; margin-top:4px}
+  th{text-align:left; font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--warm); font-weight:700; padding:6px 8px; border-bottom:1px solid var(--line)}
+  td{padding:6px 8px; border-bottom:1px solid var(--hair)}
+  td.metric{color:var(--warm); font-weight:500}
+  .pull{color:var(--teal-deep); font-size:13px;font-weight:500}
+  .pull[data-empty]{color:var(--warm-lt);font-style:italic;font-weight:400}
+
+  /* Capstone */
+  .capstone{background:var(--ink); color:#fff; border-radius:14px; padding:22px 24px; margin-top:30px; position:relative; overflow:hidden}
+  .capstone::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 60%,rgba(0,129,141,.3));pointer-events:none}
+  .capstone .kick{color:#7FC3CB}
+  .capstone h2{font-family:'Fraunces',serif; font-weight:500; font-size:23px; margin:4px 0 14px}
+  .oneline{font-family:'Fraunces',serif; font-style:italic; font-size:17px; line-height:1.4; color:#EAF2F1; border-left:3px solid #7FC3CB; padding-left:14px; margin-bottom:16px;position:relative;z-index:1}
+  .oneline[contenteditable]:focus{background:rgba(127,195,203,.08);border-radius:5px}
+  .oneline:empty::before{content:"One sentence that captures the week…";color:#7e9695;font-style:italic}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;position:relative;z-index:1}
+  @media(max-width:640px){.grid3{grid-template-columns:1fr}}
+  .gc{background:rgba(255,255,255,.06); border-radius:9px; padding:11px 13px}
+  .gc .l{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#7FC3CB;font-weight:700;margin-bottom:4px}
+  .gc .v{font-size:13px;line-height:1.35;color:#fff}
+  .gc .v:empty::before{content:"…";color:#7e9695}
+  .top3wrap{position:relative;z-index:1}
+  .top3wrap .l{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#7FC3CB;font-weight:700;margin-bottom:6px}
+  ol.top3{list-style:none;margin:0;counter-reset:c}
+  ol.top3 li{padding:5px 0 5px 26px;color:#EAF2F1;font-size:14px;position:relative;counter-increment:c}
+  ol.top3 li::before{content:counter(c);background:#7FC3CB;color:var(--ink);width:17px;height:17px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;top:8px;left:0;position:absolute}
+  ol.top3 li:empty::before{content:counter(c)}
+  ol.top3 li:empty::after{content:"…";color:#7e9695;font-style:italic;position:absolute;left:26px}
+  .sd2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;position:relative;z-index:1}
+  @media(max-width:640px){.sd2{grid-template-columns:1fr}}
+  .sd2 .b{background:rgba(255,255,255,.06);border-radius:9px;padding:11px 13px}
+  .sd2 .b .l{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:4px}
+  .sd2 .stop .l{color:#F0A98A} .sd2 .dbl .l{color:#8FD6A0}
+  .sd2 .b .v{font-size:13px;color:#fff}
+  .sd2 .b .v:empty::before{content:"…";color:#7e9695}
+
+  .foot{text-align:center; font-size:11px; color:var(--warm-lt); margin-top:26px; line-height:1.6}
+  .foot b{color:var(--warm)}
+
+  /* ===== Settings modal ===== */
+  .mb{position:fixed;inset:0;background:rgba(20,30,31,.6);display:none;align-items:center;justify-content:center;z-index:900;padding:16px}
+  .mb.show{display:flex}
+  .mw{background:#fff;border-radius:16px;padding:22px 24px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .mw h2{font-family:'Fraunces',serif;font-weight:500;font-size:22px;margin-bottom:4px}
+  .mw .desc{font-size:12.5px;color:var(--warm);margin-bottom:18px}
+  .mw label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--warm);margin:14px 0 6px}
+  .mw input{width:100%;font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;outline:none}
+  .mw input:focus{border-color:var(--teal)}
+  .mw .row{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+
+  /* Inline notice in capstone */
+  .pre-prompt{font-family:'Hanken Grotesk',sans-serif;font-style:normal;color:#7e9695;font-size:14px;line-height:1.45}
+
+  @media print{
+    .bar,.key,.gear,.foot{display:none}
+    body{background:#fff}
+    .capstone{background:#fff;color:var(--ink);border:1px solid var(--line)}
+    .capstone .kick,.gc .l,.top3wrap .l,.sd2 .b .l{color:var(--teal)}
+    .gc .v,ol.top3 li,.sd2 .b .v{color:var(--ink)}
+    .oneline{color:var(--ink);border-left-color:var(--teal)}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOCK SCREEN ===== -->
+<div id="lock" class="lock">
+  <h1>Friday <b>Closeout</b></h1>
+  <div class="sub">Enter PIN</div>
+  <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off">
+  <div id="lockErr" class="err"></div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" class="wrap" hidden>
+
+  <header class="mast fade">
+    <button class="gear" id="gearBtn" title="Settings">⚙</button>
+    <div class="kick">Friday Executive Closeout &amp; Weekly Plan</div>
+    <h1 id="weekTitle">Week of <b id="weekLabel">—</b></h1>
+    <div class="sub" id="weekSub">Pre-filled from your handwritten page + Production Dashboard. Your judgment fills the gray.</div>
+  </header>
+
+  <!-- ACTION BAR -->
+  <div class="bar fade" style="animation-delay:.04s">
+    <div class="barhd">
+      <div>
+        <div class="tt">Close the week</div>
+        <div class="meta">Production data: <b id="dashStatus">—</b> · API: <b id="apiStatus">—</b></div>
+      </div>
+      <div class="barctl">
+        <select class="hist" id="histSel"><option value="">Past Closeouts…</option></select>
+        <button class="go alt" id="newBtn" title="Start a fresh closeout">+ New</button>
+      </div>
+    </div>
+    <div class="drop" id="drop">
+      <input type="file" id="file" accept="image/png,image/jpeg,image/jpg,application/pdf">
+      <span class="ico">📄</span>
+      <div class="ti" id="dropTitle">Drop your Notability page (PNG / JPG / PDF)</div>
+      <div class="sb" id="dropSub">or tap to choose · the page Claude reads to draft the closeout</div>
+    </div>
+    <div class="actions">
+      <button class="go" id="runBtn" disabled><span id="runLabel">Run Closeout</span></button>
+      <button class="go alt" id="saveBtn">💾 Save</button>
+      <button class="go alt" id="printBtn">🖨 Print</button>
+    </div>
+    <div class="status" id="statusLine">Ready.</div>
+  </div>
+
+  <div class="key fade" style="animation-delay:.06s">
+    <div class="kc k-auto"><span class="d"></span>Auto from your data</div>
+    <div class="kc k-draft"><span class="d"></span>Claude drafted — confirm</div>
+    <div class="kc k-you"><span class="d"></span>Your call</div>
+  </div>
+
+  <!-- 1 -->
+  <section class="fade" style="animation-delay:.08s">
+    <div class="sh"><span class="sn">1</span><span class="st">Strategic Debrief</span></div>
+    <div class="cell draft">
+      <div class="lab">Biggest wins <span class="tag">drafted from closed items</span></div>
+      <ul class="cnt" data-cell="s1_wins" contenteditable data-placeholder="Run a closeout to draft from your page…"></ul>
+    </div>
+    <div class="cell you">
+      <div class="lab">Biggest miss / disappointment <span class="tag">your call</span></div>
+      <div data-cell="s1_miss" contenteditable data-placeholder="What slipped, what stung…"></div>
+    </div>
+    <div class="two">
+      <div class="cell you"><div class="lab">Most important lesson</div><div data-cell="s1_lesson" contenteditable data-placeholder="—"></div></div>
+      <div class="cell you"><div class="lab">Decision still to make</div><div data-cell="s1_decision" contenteditable data-placeholder="—"></div></div>
+    </div>
+    <div class="two">
+      <div class="cell draft"><div class="lab">Highest-leverage activity <span class="tag">draft</span></div><div data-cell="s1_leverage" contenteditable></div></div>
+      <div class="cell draft"><div class="lab">Time spent, little value <span class="tag">draft</span></div><div data-cell="s1_lowvalue" contenteditable></div></div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="fade" style="animation-delay:.1s">
+    <div class="sh"><span class="sn">2</span><span class="st">Business Scoreboard</span></div>
+    <div class="sd">Live from your Production Dashboard · <code>dashboard/state</code> · Partners only; Arbor never blended.</div>
+    <div class="cell auto">
+      <div class="lab">Partners Mortgage — MTD <span class="tag" id="s2tag">● loading…</span></div>
+      <table>
+        <thead><tr><th>Metric</th><th>This week</th><th>vs goal</th></tr></thead>
+        <tbody>
+          <tr><td class="metric">Funded volume (MTD)</td><td class="pull" data-cell="s2_fundedVol" data-empty>—</td><td class="pull" data-cell="s2_fundedVolPct" data-empty>—</td></tr>
+          <tr><td class="metric">Funded units (MTD)</td><td class="pull" data-cell="s2_fundedUnits" data-empty>—</td><td class="pull" data-cell="s2_fundedUnitsPace" data-empty>—</td></tr>
+          <tr><td class="metric">Avg loan size</td><td class="pull" data-cell="s2_avgSize" data-empty>—</td><td class="pull">—</td></tr>
+          <tr><td class="metric">Pipeline volume / units</td><td class="pull" data-cell="s2_pipelineVol" data-empty>—</td><td class="pull" data-cell="s2_pipelineActive" data-empty>—</td></tr>
+          <tr><td class="metric">Clear to close</td><td class="pull" data-cell="s2_clearToClose" data-empty>—</td><td class="pull">ready to fund</td></tr>
+          <tr><td class="metric">Active locks (units / vol)</td><td class="pull" data-cell="s2_locks" data-empty>—</td><td class="pull" data-cell="s2_locksVol" data-empty>—</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:11px;color:var(--warm);margin-top:9px" id="s2foot">Pacing against $240M annual · $20M/month · 420 units.</div>
+    </div>
+    <div class="cell you"><div class="lab">What needs executive attention next week? <span class="tag">your call</span></div><div data-cell="s2_attention" contenteditable data-placeholder="— with the numbers in front of you"></div></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="fade" style="animation-delay:.12s">
+    <div class="sh"><span class="sn">3</span><span class="st">Leadership Review</span></div>
+    <div class="two">
+      <div class="cell draft"><div class="lab">Wins by team <span class="tag">draft</span></div><ul class="cnt" data-cell="s3_wins" contenteditable></ul></div>
+      <div class="cell draft"><div class="lab">Recognition <span class="tag">draft</span></div><ul class="cnt" data-cell="s3_recognition" contenteditable></ul></div>
+    </div>
+    <div class="two">
+      <div class="cell you"><div class="lab">Needs an accountability conversation</div><div data-cell="s3_accountability" contenteditable data-placeholder="—"></div></div>
+      <div class="cell draft"><div class="lab">Future leaders in view <span class="tag">draft</span></div><div data-cell="s3_futureLeaders" contenteditable></div></div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="fade" style="animation-delay:.14s">
+    <div class="sh"><span class="sn">4</span><span class="st">Strategic Initiatives</span></div>
+    <div class="sd">Auto-built from your carry-forward — status, owner, next milestone.</div>
+    <div class="cell auto">
+      <div class="lab">Active initiatives <span class="tag">● from your page</span></div>
+      <ul class="cnt" data-cell="s4_initiatives" contenteditable data-placeholder="Initiatives will populate after you run a closeout…"></ul>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="fade" style="animation-delay:.16s">
+    <div class="sh"><span class="sn">5</span><span class="st">Open Loop Audit</span></div>
+    <div class="sd">Drafted from your page; you can add reminders/email loops manually.</div>
+    <div class="cell auto">
+      <div class="lab">Open loops <span class="tag">● auto · classified</span></div>
+      <ul class="cnt" data-cell="s5_openLoops" contenteditable data-placeholder="Run a closeout to draft from your page…"></ul>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="fade" style="animation-delay:.18s">
+    <div class="sh"><span class="sn">6</span><span class="st">Systemization &amp; Automation</span></div>
+    <div class="cell draft">
+      <div class="lab">Opportunities spotted this week <span class="tag">draft · impact / effort</span></div>
+      <ul class="cnt" data-cell="s6_opportunities" contenteditable></ul>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="fade" style="animation-delay:.2s">
+    <div class="sh"><span class="sn">7</span><span class="st">Next Week — Outcome Design</span></div>
+    <div class="sd">Outcomes, not tasks.</div>
+    <div class="two">
+      <div class="cell draft"><div class="lab">Revenue outcome <span class="tag">draft</span></div><div data-cell="s7_revenue" contenteditable></div></div>
+      <div class="cell draft"><div class="lab">Leadership outcome <span class="tag">draft</span></div><div data-cell="s7_leadership" contenteditable></div></div>
+    </div>
+    <div class="two">
+      <div class="cell draft"><div class="lab">Strategic outcome <span class="tag">draft</span></div><div data-cell="s7_strategic" contenteditable></div></div>
+      <div class="cell you"><div class="lab">Personal outcome <span class="tag">your call</span></div><div data-cell="s7_personal" contenteditable data-placeholder="Family · health · Lauren · Audrina"></div></div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="fade" style="animation-delay:.22s">
+    <div class="sh"><span class="sn">8</span><span class="st">Calendar Optimization</span></div>
+    <div class="cell you">
+      <div class="lab">Next week — what needs to move <span class="tag">your call (v2: live calendar)</span></div>
+      <ul class="cnt" data-cell="s8_calendar" contenteditable data-placeholder="Open Outlook next to this — note conflicts, missing strategic blocks, recurring meetings to prune…"></ul>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="fade" style="animation-delay:.24s">
+    <div class="sh"><span class="sn">9</span><span class="st">Executive Communication</span></div>
+    <div class="cell draft">
+      <div class="lab">Proactive outreach this week <span class="tag">draft</span></div>
+      <ul class="cnt" data-cell="s9_outreach" contenteditable></ul>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <div class="capstone fade" style="animation-delay:.28s">
+    <div class="kick">10 · Executive Summary</div>
+    <h2>The week, in focus</h2>
+    <div class="oneline" data-cell="s10_oneline" contenteditable></div>
+    <div class="grid3">
+      <div class="gc"><div class="l">Biggest win</div><div class="v" data-cell="s10_win" contenteditable></div></div>
+      <div class="gc"><div class="l">Biggest risk</div><div class="v" data-cell="s10_risk" contenteditable></div></div>
+      <div class="gc"><div class="l">Biggest opportunity</div><div class="v" data-cell="s10_opp" contenteditable></div></div>
+    </div>
+    <div class="top3wrap">
+      <div class="l">Top 3 priorities · next week</div>
+      <ol class="top3">
+        <li data-cell="s10_top1" contenteditable></li>
+        <li data-cell="s10_top2" contenteditable></li>
+        <li data-cell="s10_top3" contenteditable></li>
+      </ol>
+    </div>
+    <div class="sd2">
+      <div class="b stop"><div class="l">Stop doing</div><div class="v" data-cell="s10_stop" contenteditable></div></div>
+      <div class="b dbl"><div class="l">Double down on</div><div class="v" data-cell="s10_dbl" contenteditable></div></div>
+    </div>
+  </div>
+
+  <div class="foot fade" style="animation-delay:.3s">
+    Three colors, one principle: <b>Claude gathers, you judge.</b> The blue and amber are filled before you sit down. Your Friday is the gray.
+  </div>
+</div>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="mb" id="settingsModal" hidden>
+  <div class="mw">
+    <h2>Settings</h2>
+    <div class="desc">Anthropic key is stored in your private Firestore. PIN gates this panel and the closeout itself.</div>
+    <label>Anthropic API key</label>
+    <input id="apiKeyInput" type="password" placeholder="sk-ant-…">
+    <label>PIN (4–6 digits)</label>
+    <input id="pinChangeInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="leave blank to keep">
+    <label>Week label (override)</label>
+    <input id="weekOverride" type="text" placeholder="e.g. May 25 → June 1 (auto if blank)">
+    <div class="row">
+      <button class="go alt" id="settingsCancel">Cancel</button>
+      <button class="go" id="settingsSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================================================================
+   Friday Closeout — functional tool
+   Firebase: friday-closeout (own state) + cross-project read of
+   partners-production-dashboard for §2.
+   =================================================================== */
+
+const FRIDAY_CONFIG = {
+  apiKey: "AIzaSyDRtc2xwrfrjnG_yAZSGtqh37FJbcggCe4",
+  authDomain: "friday-closeout.firebaseapp.com",
+  projectId: "friday-closeout",
+  storageBucket: "friday-closeout.firebasestorage.app",
+  messagingSenderId: "200320219316",
+  appId: "1:200320219316:web:28a0f0cee8340a8afbffe1"
+};
+const DASHBOARD_PROJECT = "partners-production-dashboard";
+const DEFAULT_PIN = "1687";
+const MODEL = "claude-sonnet-4-6";
+
+let db = null;
+let settings = { apiKey: "", pin: DEFAULT_PIN, weekOverride: "" };
+let uploadedFile = null;
+let dashboardState = null; // parsed from Firestore
+let currentClosoutDocId = null; // when loading from history
+
+/* ===== Firebase ===== */
+function initFirebase(){
+  try {
+    if(!firebase.apps.length) firebase.initializeApp(FRIDAY_CONFIG);
+    db = firebase.firestore();
+    return true;
+  } catch(e){ console.warn("Firebase init failed:", e); return false; }
+}
+
+/* ===== PIN / Settings ===== */
+async function loadSettings(){
+  if(!db) return;
+  try {
+    const doc = await db.collection("settings").doc("config").get();
+    if(doc.exists){
+      const d = doc.data();
+      settings.apiKey = d.apiKey || "";
+      settings.pin = d.pin || DEFAULT_PIN;
+      settings.weekOverride = d.weekOverride || "";
+    }
+  } catch(e){ console.warn("loadSettings:", e); }
+}
+async function saveSettings(){
+  if(!db){
+    initFirebase();
+    if(!db) throw new Error("Firebase not initialized — check your internet connection and that Firestore rules are published.");
+  }
+  await db.collection("settings").doc("config").set(settings, {merge:true});
+}
+
+/* ===== Lock screen ===== */
+function showLock(){
+  document.getElementById("lock").style.display = "flex";
+  document.getElementById("app").hidden = true;
+  document.getElementById("pinInput").focus();
+}
+function unlock(){
+  document.getElementById("lock").style.display = "none";
+  document.getElementById("app").hidden = false;
+  onAppOpen();
+}
+document.getElementById("pinInput").addEventListener("input", async (e)=>{
+  const v = e.target.value;
+  document.getElementById("lockErr").textContent = "";
+  if(v.length >= 4){
+    // try unlock if matches current settings or default
+    await loadSettings();
+    if(v === settings.pin || v === DEFAULT_PIN){
+      try { sessionStorage.setItem("fc_unlocked","1"); } catch(_){}
+      unlock();
+    } else if(v.length >= settings.pin.length){
+      document.getElementById("lockErr").textContent = "Try again";
+      setTimeout(()=>{ e.target.value=""; },600);
+    }
+  }
+});
+
+/* ===== Status helpers ===== */
+function setStatus(msg, cls){
+  const el = document.getElementById("statusLine");
+  el.textContent = msg;
+  el.className = "status " + (cls||"");
+}
+function setDashStatus(s){ document.getElementById("dashStatus").textContent = s; }
+function setApiStatus(){
+  document.getElementById("apiStatus").textContent = settings.apiKey ? "✓ set" : "not set";
+}
+
+/* ===== Week label ===== */
+function currentWeekLabel(){
+  if(settings.weekOverride) return settings.weekOverride;
+  const now = new Date();
+  // Find Monday of this week
+  const day = now.getDay(); // 0=Sun ... 5=Fri
+  const monday = new Date(now); monday.setDate(now.getDate() - ((day+6)%7));
+  const friday = new Date(monday); friday.setDate(monday.getDate()+4);
+  const mNext = new Date(monday); mNext.setDate(monday.getDate()+7);
+  const fmt = d => d.toLocaleDateString("en-US",{month:"long",day:"numeric"});
+  return `${fmt(monday)} → ${fmt(mNext)}`;
+}
+function currentClosoutId(){
+  // Use the Monday of this week as the doc id (YYYY-MM-DD)
+  const now = new Date();
+  const day = now.getDay();
+  const monday = new Date(now); monday.setDate(now.getDate() - ((day+6)%7));
+  return monday.toISOString().slice(0,10);
+}
+
+/* ===== §2 — read Production Dashboard ===== */
+async function loadDashboard(){
+  setDashStatus("loading…");
+  const s2tag = document.getElementById("s2tag");
+  s2tag.innerHTML = '● <span class="spin"></span> live · loading';
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${DASHBOARD_PROJECT}/databases/(default)/documents/dashboard/state`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const f = data.fields || {};
+    const get = k => (f[k]?.stringValue ?? null);
+    const safe = (s) => { try { return JSON.parse(s); } catch(_) { return null; } };
+    dashboardState = {
+      monthlyProduction: safe(get("monthlyProduction")) || {},
+      pipeline: safe(get("pipeline")) || [],
+      goals: safe(get("goals")) || null,
+      lockedMonths: safe(get("lockedMonths")) || {},
+      updatedAt: f.updatedAt?.timestampValue || null
+    };
+    setDashStatus("✓ live");
+    s2tag.innerHTML = '● live · Firestore <code>dashboard/state</code>';
+    // Quick local compute for the §2 metrics
+    computeS2();
+  } catch(e){
+    setDashStatus("err");
+    s2tag.innerHTML = '● dashboard offline';
+    console.warn("Dashboard read:", e);
+  }
+}
+
+function fmt$(n){
+  if(n==null||isNaN(n)) return "—";
+  if(n>=1e9) return "$"+(n/1e9).toFixed(2)+"B";
+  if(n>=1e6) return "$"+(n/1e6).toFixed(2)+"M";
+  if(n>=1e3) return "$"+(n/1e3).toFixed(0)+"K";
+  return "$"+n.toFixed(0);
+}
+function setCell(key, val, isEmpty){
+  const el = document.querySelector(`[data-cell="${key}"]`);
+  if(!el) return;
+  el.textContent = val;
+  if(isEmpty) el.setAttribute("data-empty",""); else el.removeAttribute("data-empty");
+}
+
+function computeS2(){
+  if(!dashboardState) return;
+  // monthlyProduction shape: {YYYY-MM: [loanRecords]} (best guess from dashboard code)
+  // We'll attempt several common shapes and aggregate MTD.
+  const now = new Date();
+  const ym = now.toISOString().slice(0,7); // YYYY-MM
+  let mtdLoans = [];
+  const mp = dashboardState.monthlyProduction;
+  if(Array.isArray(mp[ym])) mtdLoans = mp[ym];
+  else if(mp[ym] && Array.isArray(mp[ym].loans)) mtdLoans = mp[ym].loans;
+  else if(mp[ym] && typeof mp[ym]==='object'){
+    // try first array property
+    for(const k of Object.keys(mp[ym])) if(Array.isArray(mp[ym][k])){ mtdLoans = mp[ym][k]; break; }
+  }
+
+  // Try to extract amounts/units regardless of field naming
+  const amtField = (r)=> r.fundedAmount ?? r.amount ?? r.loanAmount ?? r.volume ?? r.Amount ?? r.LoanAmount ?? 0;
+  const mtdVol = mtdLoans.reduce((s,r)=>s+(Number(amtField(r))||0),0);
+  const mtdUnits = mtdLoans.length;
+  const avg = mtdUnits>0 ? mtdVol/mtdUnits : 0;
+
+  const monthlyGoal = (dashboardState.goals?.monthlyTarget) ?? 20000000;
+  const annualUnitsGoal = (dashboardState.goals?.annualUnits) ?? 420;
+  const annualVolGoal = (dashboardState.goals?.annualVolume) ?? 240000000;
+
+  setCell("s2_fundedVol", fmt$(mtdVol), mtdVol===0);
+  setCell("s2_fundedVolPct", monthlyGoal? ((mtdVol/monthlyGoal*100).toFixed(2)+"% of " + fmt$(monthlyGoal)) : "—", mtdVol===0);
+  setCell("s2_fundedUnits", String(mtdUnits), mtdUnits===0);
+  setCell("s2_fundedUnitsPace", `pace to ${annualUnitsGoal}/yr`, false);
+  setCell("s2_avgSize", fmt$(avg), avg===0);
+
+  // pipeline
+  const pl = dashboardState.pipeline || [];
+  const plVol = pl.reduce((s,r)=>s+(Number(amtField(r))||0),0);
+  const plUnits = pl.length;
+  setCell("s2_pipelineVol", fmt$(plVol), plVol===0);
+  setCell("s2_pipelineActive", `${plUnits} active`, plUnits===0);
+
+  // clear to close & locks: try heuristic on pipeline records
+  const ctc = pl.filter(r => /clear/i.test(r.status||r.Status||r.statusReason||r.StatusReason||"")).length;
+  setCell("s2_clearToClose", String(ctc), ctc===0);
+
+  const locks = pl.filter(r => (r.locked===true) || /lock/i.test(r.status||r.Status||""));
+  const locksVol = locks.reduce((s,r)=>s+(Number(amtField(r))||0),0);
+  setCell("s2_locks", `${locks.length} units`, locks.length===0);
+  setCell("s2_locksVol", fmt$(locksVol)+" locked", locksVol===0);
+
+  // updated stamp
+  const upd = dashboardState.updatedAt ? new Date(dashboardState.updatedAt).toLocaleString() : "—";
+  document.getElementById("s2foot").innerHTML =
+    `Pacing against ${fmt$(annualVolGoal)} annual · ${fmt$(monthlyGoal)}/month · ${annualUnitsGoal} units. <span style="opacity:.7">Dashboard updated ${upd}</span>`;
+}
+
+/* ===== File upload ===== */
+const drop = document.getElementById("drop");
+const fileInput = document.getElementById("file");
+drop.addEventListener("click", ()=> fileInput.click());
+drop.addEventListener("dragover", e=>{ e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", ()=> drop.classList.remove("over"));
+drop.addEventListener("drop", e=>{
+  e.preventDefault(); drop.classList.remove("over");
+  if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", e=>{
+  if(e.target.files.length) handleFile(e.target.files[0]);
+});
+function handleFile(f){
+  uploadedFile = f;
+  drop.classList.add("has");
+  document.getElementById("dropTitle").textContent = "📄 " + f.name;
+  document.getElementById("dropSub").textContent = `${(f.size/1024).toFixed(0)} KB · ${f.type||"unknown"}`;
+  document.getElementById("runBtn").disabled = !settings.apiKey;
+  if(!settings.apiKey){
+    setStatus("Add your Anthropic key in Settings ⚙ to enable Run.", "err");
+  } else {
+    setStatus("Page loaded. Tap Run Closeout to draft.", "ok");
+  }
+}
+
+/* ===== Run Closeout ===== */
+async function fileToBase64(f){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(",")[1]);
+    r.onerror = rej;
+    r.readAsDataURL(f);
+  });
+}
+
+const PROMPT = `You are pre-filling a Friday Executive Closeout for Leif Boyd — President, Partners Mortgage / CPO, Arbor Financial. He runs a 10-section weekly review combining strategic debrief, scoreboard, leadership, initiatives, open loops, systemization, next-week outcomes, calendar, comms, and a capstone summary.
+
+I am giving you (1) his handwritten weekly page (image) and (2) the live production data from his dashboard (JSON).
+
+NOTATION on the page: X = done, > = carry forward, ⊙ = in progress, plain bullet = active/undone. Colors: red = recruiting/urgent, blue = personal/dashboard, green = AI/new. Names referenced may include: Dan (Trinidad, CEO), Matt Perez & Jason Malmstrom (Production), JoAnn Lockard (Ops), Peter Schwartz (BD/Recruiting), Joel Morgan (CRM/Tech), Rach (Rachael Gaines), Aidan, Ryan K, Dave (Reesman).
+
+YOUR JOB: Return ONLY a JSON object (no prose, no markdown fences) with these keys. Each value is either a string (for text cells) or an array of strings (for bullet lists). For lists, render each item as the bullet text WITHOUT a leading dash/bullet.
+
+Required keys:
+- s1_wins: array of 3-5 wins drafted from items marked X on the page (closed/done items count as wins)
+- s1_leverage: one-line draft of highest-leverage activity this week
+- s1_lowvalue: one-line draft of an activity that consumed time but created little value
+- s3_wins: array of 2-4 wins by team members (use the names visible on the page)
+- s3_recognition: array of 1-3 recognition prompts (birthdays, big efforts, handoffs)
+- s3_futureLeaders: one-line on future leaders visible (e.g., directors under evaluation)
+- s4_initiatives: array of active/carry-forward initiatives, each as "Name — status / next milestone · owner (if known)"
+- s5_openLoops: array of open loops, each item ending with a classification: " [Do]", " [Delegate]", " [Defer]", or " [Eliminate]"
+- s6_opportunities: array of 2-4 systemization/automation opportunities spotted, each with impact/effort note
+- s7_revenue: one-line desired revenue outcome for next week
+- s7_leadership: one-line desired leadership outcome
+- s7_strategic: one-line desired strategic outcome
+- s9_outreach: array of 3-5 proactive outreach items, each as "Person — what / why"
+- s10_oneline: one sentence capturing the week (italic-worthy)
+- s10_win: biggest win in 6-12 words
+- s10_risk: biggest risk in 6-12 words
+- s10_opp: biggest opportunity in 6-12 words
+- s10_top1, s10_top2, s10_top3: top 3 priorities for next week, each 5-12 words
+- s10_stop: one thing to stop doing
+- s10_dbl: one thing to double down on
+
+Leave the following fields out — they are the executive's own reflection: s1_miss, s1_lesson, s1_decision, s2_attention, s3_accountability, s7_personal, s8_calendar. Do not fabricate these.
+
+The §2 scoreboard is computed separately from the dashboard data — do not include §2 metrics in the JSON.
+
+Be specific. Quote names and items directly from the page. Where handwriting is uncertain, flag it inline with "(check)".
+
+Today's date: __DATE__
+Carry-forward week: __WEEK__`;
+
+document.getElementById("runBtn").addEventListener("click", runCloseout);
+
+async function runCloseout(){
+  if(!uploadedFile){ setStatus("Drop or choose your page first.","err"); return; }
+  if(!settings.apiKey){ setStatus("Anthropic key missing — open Settings.","err"); return; }
+  const btn = document.getElementById("runBtn");
+  const lbl = document.getElementById("runLabel");
+  btn.disabled = true;
+  lbl.innerHTML = '<span class="spin"></span> Reading your page…';
+  setStatus("Encoding the page…");
+
+  try {
+    const b64 = await fileToBase64(uploadedFile);
+    const mime = uploadedFile.type || "image/png";
+    const isPdf = /pdf/i.test(mime);
+
+    const prompt = PROMPT
+      .replace("__DATE__", new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"}))
+      .replace("__WEEK__", currentWeekLabel());
+
+    const dashboardSummary = dashboardState
+      ? `\n\nDASHBOARD DATA (JSON):\n${JSON.stringify({
+          monthlyProductionKeys: Object.keys(dashboardState.monthlyProduction||{}),
+          pipelineCount: (dashboardState.pipeline||[]).length,
+          goals: dashboardState.goals,
+          updatedAt: dashboardState.updatedAt
+        })}`
+      : "\n\n(Dashboard data unavailable.)";
+
+    setStatus("Sending to Claude…");
+    lbl.innerHTML = '<span class="spin"></span> Drafting…';
+
+    const body = {
+      model: MODEL,
+      max_tokens: 4000,
+      messages: [{
+        role: "user",
+        content: [
+          { type: isPdf ? "document" : "image",
+            source: { type: "base64", media_type: mime, data: b64 } },
+          { type: "text", text: prompt + dashboardSummary }
+        ]
+      }]
+    };
+
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": settings.apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok){
+      const err = await res.text();
+      throw new Error(`Claude ${res.status}: ${err.substring(0,400)}`);
+    }
+    const data = await res.json();
+    const txt = (data.content||[]).map(c=>c.text||"").join("").trim();
+    // strip code fences if any
+    const clean = txt.replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/i,"").trim();
+    let parsed;
+    try { parsed = JSON.parse(clean); }
+    catch(e){
+      // Try to find JSON object inside text
+      const m = clean.match(/\{[\s\S]*\}/);
+      if(m){ parsed = JSON.parse(m[0]); } else throw new Error("Could not parse JSON from response");
+    }
+
+    applyResponse(parsed);
+    setStatus("Draft filled. Edit cells in place; tap Save when done.", "ok");
+    lbl.textContent = "Re-run";
+  } catch(e){
+    console.error(e);
+    setStatus("Error: " + e.message, "err");
+    lbl.textContent = "Run Closeout";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function applyResponse(j){
+  // List fields
+  const lists = ["s1_wins","s3_wins","s3_recognition","s4_initiatives","s5_openLoops","s6_opportunities","s9_outreach"];
+  for(const k of lists){
+    const el = document.querySelector(`[data-cell="${k}"]`);
+    if(!el) continue;
+    const arr = Array.isArray(j[k]) ? j[k] : (j[k] ? [j[k]] : []);
+    el.innerHTML = arr.map(it => `<li>${escapeHtml(it)}</li>`).join("");
+  }
+  // Plain text fields
+  const txt = ["s1_leverage","s1_lowvalue","s3_futureLeaders","s7_revenue","s7_leadership","s7_strategic",
+               "s10_oneline","s10_win","s10_risk","s10_opp","s10_top1","s10_top2","s10_top3","s10_stop","s10_dbl"];
+  for(const k of txt){
+    const el = document.querySelector(`[data-cell="${k}"]`);
+    if(!el) continue;
+    if(j[k]) el.textContent = j[k];
+  }
+  // Persist the AI draft immediately so refresh-after-Run never loses it
+  dirty = true;
+  performSave().then(()=> refreshHistory());
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c])); }
+
+/* ===== Save / Load history ===== */
+function collectCells(){
+  const out = {};
+  document.querySelectorAll("[data-cell]").forEach(el=>{
+    const k = el.getAttribute("data-cell");
+    if(el.tagName === "UL"){
+      out[k] = Array.from(el.querySelectorAll("li")).map(li => li.textContent.trim()).filter(Boolean);
+    } else {
+      out[k] = el.textContent.trim();
+    }
+  });
+  return out;
+}
+function applyCells(d){
+  document.querySelectorAll("[data-cell]").forEach(el=>{
+    const k = el.getAttribute("data-cell");
+    if(!(k in d)) return;
+    if(el.tagName === "UL"){
+      const arr = Array.isArray(d[k]) ? d[k] : (d[k] ? [d[k]] : []);
+      el.innerHTML = arr.map(it=>`<li>${escapeHtml(it)}</li>`).join("");
+    } else {
+      el.textContent = d[k] || "";
+    }
+  });
+}
+/* ===== Auto-save (debounced on edit) ===== */
+let saveTimer = null;
+let saving = false;
+let dirty = false;
+let lastSavedAt = null;
+
+function scheduleSave(){
+  dirty = true;
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(performSave, 2000);
+  setStatus("Editing · auto-save in 2s");
+}
+
+async function performSave(){
+  if(saving) return;
+  if(!db){
+    initFirebase();
+    if(!db){ setStatus("Auto-save off — Firebase unavailable","err"); return; }
+  }
+  if(!dirty) return;
+  saving = true;
+  dirty = false;
+  if(saveTimer){ clearTimeout(saveTimer); saveTimer = null; }
+  setStatus("Saving…");
+  try {
+    const id = currentClosoutDocId || currentClosoutId();
+    const payload = {
+      cells: collectCells(),
+      weekLabel: currentWeekLabel(),
+      savedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    await db.collection("weekly-closeouts").doc(id).set(payload, {merge:true});
+    currentClosoutDocId = id;
+    lastSavedAt = new Date();
+    setStatus("Saved · " + lastSavedAt.toLocaleTimeString(), "ok");
+  } catch(e){
+    console.error("Auto-save failed:", e);
+    setStatus("Auto-save failed: " + (e && e.message ? e.message : e), "err");
+    dirty = true; // retain dirty so a retry happens on next edit
+  } finally {
+    saving = false;
+    if(dirty) scheduleSave(); // catch any edits that arrived during save
+  }
+}
+
+// Listen for any edit on a data-cell and debounce-save
+document.addEventListener("input", (e)=>{
+  if(e.target.closest && e.target.closest("[data-cell]")) scheduleSave();
+});
+// Best-effort flush on unload
+window.addEventListener("beforeunload", ()=>{ if(dirty) performSave(); });
+
+// Manual checkpoint: force-save now + refresh history dropdown
+document.getElementById("saveBtn").addEventListener("click", async ()=>{
+  dirty = true;
+  await performSave();
+  await refreshHistory();
+});
+
+async function refreshHistory(){
+  if(!db) return;
+  try {
+    const snap = await db.collection("weekly-closeouts").orderBy(firebase.firestore.FieldPath.documentId(),"desc").limit(30).get();
+    const sel = document.getElementById("histSel");
+    sel.innerHTML = '<option value="">Past Closeouts…</option>';
+    snap.forEach(doc=>{
+      const d = doc.data();
+      const opt = document.createElement("option");
+      opt.value = doc.id;
+      opt.textContent = (d.weekLabel || doc.id);
+      sel.appendChild(opt);
+    });
+  } catch(e){ console.warn("history:",e); }
+}
+document.getElementById("histSel").addEventListener("change", async (e)=>{
+  const id = e.target.value;
+  if(!id) return;
+  setStatus("Loading "+id+"…");
+  try {
+    const doc = await db.collection("weekly-closeouts").doc(id).get();
+    if(!doc.exists){ setStatus("Not found","err"); return; }
+    const d = doc.data();
+    applyCells(d.cells || {});
+    currentClosoutDocId = id;
+    document.getElementById("weekLabel").textContent = d.weekLabel || id;
+    setStatus("Loaded "+id+". Edits will save back to this week.", "ok");
+  } catch(e){ setStatus("Load failed: "+e.message,"err"); }
+});
+
+document.getElementById("newBtn").addEventListener("click", ()=>{
+  if(!confirm("Start a fresh closeout for the current week? With auto-save on, this week's saved closeout will be overwritten on your next edit.")) return;
+  currentClosoutDocId = null;
+  document.querySelectorAll("[data-cell]").forEach(el=>{
+    if(el.tagName==="UL") el.innerHTML="";
+    else el.textContent="";
+  });
+  document.getElementById("weekLabel").textContent = currentWeekLabel();
+  uploadedFile = null;
+  drop.classList.remove("has");
+  document.getElementById("dropTitle").textContent = "Drop your Notability page (PNG / JPG / PDF)";
+  document.getElementById("dropSub").textContent = "or tap to choose · the page Claude reads to draft the closeout";
+  document.getElementById("runBtn").disabled = true;
+  document.getElementById("runLabel").textContent = "Run Closeout";
+  computeS2(); // refresh §2 from latest dashboard
+  setStatus("Ready.");
+});
+
+document.getElementById("printBtn").addEventListener("click", ()=> window.print());
+
+/* ===== Settings modal ===== */
+const settingsModal = document.getElementById("settingsModal");
+document.getElementById("gearBtn").addEventListener("click", ()=>{
+  document.getElementById("apiKeyInput").value = settings.apiKey || "";
+  document.getElementById("pinChangeInput").value = "";
+  document.getElementById("weekOverride").value = settings.weekOverride || "";
+  settingsModal.classList.add("show");
+});
+document.getElementById("settingsCancel").addEventListener("click", ()=> settingsModal.classList.remove("show"));
+document.getElementById("settingsSave").addEventListener("click", async ()=>{
+  settings.apiKey = document.getElementById("apiKeyInput").value.trim();
+  const newPin = document.getElementById("pinChangeInput").value.trim();
+  if(newPin){
+    if(!/^\d{4,6}$/.test(newPin)){ alert("PIN must be 4–6 digits."); return; }
+    settings.pin = newPin;
+  }
+  settings.weekOverride = document.getElementById("weekOverride").value.trim();
+  setStatus("Saving settings…");
+  try {
+    await saveSettings();
+    setApiStatus();
+    document.getElementById("weekLabel").textContent = currentWeekLabel();
+    settingsModal.classList.remove("show");
+    setStatus("Settings saved · " + new Date().toLocaleTimeString(), "ok");
+    if(uploadedFile && settings.apiKey) document.getElementById("runBtn").disabled = false;
+  } catch(e){
+    console.error("Settings save failed:", e);
+    alert("Save failed: " + (e && e.message ? e.message : e));
+    setStatus("Save failed — " + (e && e.message ? e.message : e), "err");
+  }
+});
+
+/* ===== App boot ===== */
+async function onAppOpen(){
+  initFirebase();
+  await loadSettings();
+  setApiStatus();
+  document.getElementById("weekLabel").textContent = currentWeekLabel();
+  await loadDashboard();
+  await refreshHistory();
+  if(!settings.apiKey){
+    setStatus("First-time setup: open Settings ⚙ and add your Anthropic key.", "err");
+  } else {
+    setStatus("Ready. Drop your Notability page above to draft the week.", "ok");
+  }
+}
+
+// Auto-unlock if session is still valid
+(function bootLock(){
+  try {
+    if(sessionStorage.getItem("fc_unlocked") === "1"){ unlock(); return; }
+  } catch(_){}
+  showLock();
+})();
+</script>
+</body>
+</html>
