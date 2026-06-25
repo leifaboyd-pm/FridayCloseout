@@ -1255,7 +1255,6 @@ async function onAppOpen(){
     {group:"Partners Mortgage", items:["Marketing + AI","Daily Partners Tasks","Dan Trinidad","Production Leadership","Recruiting/Growth","Operations","Transition + Reverse","Technology","Onboarding/HR","Calls To Make","Partners Private Capital","All Hands on Deck - Topics","Good Times Crew","Premier Lender Partners","Long Term Projects"]},
     {group:"Personal", items:["Home Chores","Get On The Road","Grocery List","Personal","Movies and Shows","Birthdays + Annys","Tax Strategy","Gifts To Give","Packing List"]}
   ];
-  var STORE_KEY="fc_remsent_v1";
   var CELLS=["s4_initiatives","s5_openLoops"];
   var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   function nextMon(){var d=new Date();var a=(8-d.getDay())%7;if(a===0)a=7;d.setDate(d.getDate()+a);return d;}
@@ -1263,22 +1262,33 @@ async function onAppOpen(){
 
   var bd=document.getElementById("remBackdrop");
   var body=document.getElementById("remBody");
-  var SENT={};  // { cell: { itemText: {status:"sent",list:"..."} | {status:"done"} } } for current week
+  var SENT={};   // { cell: { itemText: {status:"sent",list} | {status:"done"} } } — mirrors Firestore
 
-  function weekKey(){var el=document.getElementById("weekLabel");return (el&&el.textContent.trim())||"current";}
-  function readStore(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||"{}");}catch(e){return {};}}
-  function loadSent(){
-    var all=readStore(); var raw=all[weekKey()]||{}; SENT={};
-    Object.keys(raw).forEach(function(cell){
-      SENT[cell]={}; var m=raw[cell]||{};
-      Object.keys(m).forEach(function(t){
-        var v=m[t];
-        if(typeof v==="string"){SENT[cell][t]={status:"sent",list:v};}      // legacy v1
-        else if(v&&v.status){SENT[cell][t]=v;}
-      });
-    });
+  // ---- Firestore: marks live on the closeout doc under remProcessed, so they sync across devices ----
+  function activeDocId(){try{return (currentClosoutDocId||currentClosoutId())||null;}catch(e){return null;}}
+  function ensureDb(){if(!db){try{if(typeof initFirebase==="function")initFirebase();}catch(e){}}return !!db;}
+  function normalizeMarks(obj){
+    var out={};CELLS.forEach(function(c){out[c]={};});
+    if(!obj)return out;
+    CELLS.forEach(function(c){var m=obj[c]||{};Object.keys(m).forEach(function(t){var v=m[t];if(typeof v==="string"){out[c][t]={status:"sent",list:v};}else if(v&&v.status){out[c][t]={status:v.status,list:v.list};}});});
+    return out;
   }
-  function saveSent(){try{var all=readStore();all[weekKey()]=SENT;localStorage.setItem(STORE_KEY,JSON.stringify(all));}catch(e){}}
+  var lastSyncedId=null, syncing=false;
+  function syncFromCloud(force){
+    var id=activeDocId(); if(!id) return;
+    if(!force && id===lastSyncedId) return;
+    if(!ensureDb()) return;
+    if(syncing) return; syncing=true;
+    db.collection("weekly-closeouts").doc(id).get().then(function(doc){
+      SENT=normalizeMarks(doc&&doc.exists?((doc.data()||{}).remProcessed):null);
+      lastSyncedId=id; CELLS.forEach(applyMarks);
+    }).catch(function(){}).then(function(){syncing=false;});
+  }
+  function pushToCloud(){
+    var id=activeDocId(); if(!id || !ensureDb()) return;
+    try{db.collection("weekly-closeouts").doc(id).set({remProcessed:SENT},{merge:true}).catch(function(){});}catch(e){}
+  }
+
   function recordSent(cell,text,list){if(!SENT[cell])SENT[cell]={};SENT[cell][text]={status:"sent",list:list};}
   function recordDone(cell,text){if(!SENT[cell])SENT[cell]={};SENT[cell][text]={status:"done"};}
   function clearRec(cell,text){if(SENT[cell]){delete SENT[cell][text];}}
@@ -1288,7 +1298,6 @@ async function onAppOpen(){
 
   function parseItem(t){var m=t.match(/\s*\[(Do|Delegate|Defer|Eliminate)\]\s*$/i);if(m){return{title:t.slice(0,m.index).trim(),tag:m[1]};}return{title:t.trim(),tag:""};}
 
-  // Self-healing: re-apply page marks from the persisted record on any render
   function applyMarks(cell){
     var ul=document.querySelector('[data-cell="'+cell+'"]'); if(!ul)return;
     var map=SENT[cell]||{};
@@ -1331,7 +1340,7 @@ async function onAppOpen(){
     r.classList.remove("done");r.classList.remove("kdone");delete r.dataset.done;delete r.dataset.kind;
     var s=r.querySelector(".rem-sent");s.className="rem-sent";s.textContent="";
     if(r._srcLi){r._srcLi.classList.remove("rem-done-li");r._srcLi.classList.remove("rem-complete-li");r._srcLi.removeAttribute("data-rem-list");}
-    if(r._cell&&r._srcText){clearRec(r._cell,r._srcText);saveSent();}
+    if(r._cell&&r._srcText){clearRec(r._cell,r._srcText);pushToCloud();}
     refresh();
   }
   function makeRow(item,srcLi){
@@ -1349,7 +1358,7 @@ async function onAppOpen(){
     return r;
   }
   function open(src,label){
-    loadSent();
+    syncFromCloud(false);
     body.innerHTML="";
     var ul=document.querySelector('[data-cell="'+src+'"]');
     var lis=ul?Array.prototype.slice.call(ul.querySelectorAll("li")).filter(function(li){return li.textContent.trim();}):[];
@@ -1384,28 +1393,28 @@ async function onAppOpen(){
   document.getElementById("remComplete").addEventListener("click",function(){
     var rs=eligible();if(!rs.length)return;
     rs.forEach(function(r){recordDone(r._cell,r._srcText);markDone(r);});
-    saveSent();refresh();
+    pushToCloud();refresh();
   });
   document.getElementById("remSend").addEventListener("click",function(){
     var rs=eligible();if(!rs.length)return;
     var text=rs.map(lineFor).join("\n");
     rs.forEach(function(r){recordSent(r._cell,r._srcText,r.querySelector("select").value);markSent(r);});
-    saveSent();refresh();
-    try{if(window.performSave)window.performSave();}catch(e){}   // flush any pending closeout edit first
+    pushToCloud();refresh();
+    try{if(window.performSave)window.performSave();}catch(e){}
     window.location.href="shortcuts://run-shortcut?name="+encodeURIComponent(SHORTCUT_NAME)+"&input=text&text="+encodeURIComponent(text);
   });
 
-  // init: paint persisted marks and keep them painted across re-render / reload
-  loadSent();
+  // init: paint, pull from cloud (retry until Firebase ready), keep painted across renders + history switches
+  CELLS.forEach(applyMarks);
+  (function poll(n){ syncFromCloud(true); if((!db || lastSyncedId===null) && n<24){ setTimeout(function(){poll(n+1);},500); } })(0);
   CELLS.forEach(function(cell){
-    applyMarks(cell);
     var ul=document.querySelector('[data-cell="'+cell+'"]');
     if(ul && window.MutationObserver){
-      new MutationObserver(function(){loadSent();applyMarks(cell);}).observe(ul,{childList:true});
+      new MutationObserver(function(){ applyMarks(cell); syncFromCloud(false); }).observe(ul,{childList:true});
     }
   });
 
-  // Commit closeout edits the instant you click out of a field, instead of waiting for the debounce.
+  // commit closeout text edits the instant you leave a field (closes the autosave debounce gap)
   document.addEventListener("focusout",function(e){
     if(e.target && e.target.closest && e.target.closest("[data-cell]") && window.performSave){ window.performSave(); }
   });
