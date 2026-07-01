@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Closeout">
 <meta name="theme-color" content="#1A2B2E">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
@@ -23,7 +23,7 @@
     --amber-2:#FFAC27; --amber-lt:#F6CD80; --purple:#AD60BF; --green:#96C121; --red:#FB5058;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Hanken Grotesk',sans-serif; color:var(--ink); line-height:1.5;
+  body{font-family:'Montserrat',sans-serif; color:var(--ink); line-height:1.5;
     background:var(--paper);
     background-image:radial-gradient(circle at 10% 5%, rgba(0,129,141,.04), transparent 38%);
     background-attachment:fixed; padding:0; min-height:100vh;
@@ -37,17 +37,17 @@
 
   /* ===== Lock screen ===== */
   .lock{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;padding:24px;color:#fff}
-  .lock h1{font-family:'Fraunces',serif;font-weight:500;font-size:32px;letter-spacing:-.01em;margin-bottom:6px}
+  .lock h1{font-family:'Lora',serif;font-weight:500;font-size:32px;letter-spacing:-.01em;margin-bottom:6px}
   .lock h1 b{font-style:italic;font-weight:400;color:#7FC3CB}
   .lock .sub{color:#9eb7b6;font-size:13px;margin-bottom:26px;text-align:center;max-width:320px}
-  .lock input{font-family:'Fraunces',serif;font-size:32px;width:160px;text-align:center;letter-spacing:.3em;padding:10px;background:rgba(255,255,255,.07);border:1px solid #2a3d3f;color:#fff;border-radius:10px;outline:none}
+  .lock input{font-family:'Lora',serif;font-size:32px;width:160px;text-align:center;letter-spacing:.3em;padding:10px;background:rgba(255,255,255,.07);border:1px solid #2a3d3f;color:#fff;border-radius:10px;outline:none}
   .lock input:focus{border-color:var(--teal)}
   .lock .err{color:#F0A98A;font-size:12px;margin-top:14px;min-height:18px}
 
   /* ===== Masthead ===== */
   .mast{border-bottom:2px solid var(--ink); padding-bottom:14px; position:relative}
   .kick{font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--teal); font-weight:700}
-  .mast h1{font-family:'Fraunces',serif; font-weight:500; font-size:32px; letter-spacing:-.015em; margin-top:5px}
+  .mast h1{font-family:'Lora',serif; font-weight:500; font-size:32px; letter-spacing:-.015em; margin-top:5px}
   .mast h1 b{font-style:italic; font-weight:400; color:var(--teal)}
   .sub{font-size:13px; color:var(--warm); margin-top:7px}
   .gear{position:absolute;top:0;right:0;background:none;border:0;font-size:18px;color:var(--warm);padding:6px;cursor:pointer;border-radius:6px}
@@ -56,7 +56,7 @@
   /* ===== Action bar ===== */
   .bar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:18px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
   .barhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
-  .barhd .tt{font-family:'Fraunces',serif;font-size:16px;font-weight:600;letter-spacing:-.01em}
+  .barhd .tt{font-family:'Lora',serif;font-size:16px;font-weight:600;letter-spacing:-.01em}
   .barhd .meta{font-size:11px;color:var(--warm)}
   .barhd .meta b{color:var(--ink);font-weight:600}
   .barctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -89,8 +89,8 @@
   /* ===== Sections ===== */
   section{margin-top:26px}
   .sh{display:flex; align-items:baseline; gap:11px; margin-bottom:10px}
-  .sn{font-family:'Fraunces',serif; font-size:15px; color:var(--warm-lt); font-weight:600; min-width:22px}
-  .st{font-family:'Fraunces',serif; font-weight:500; font-size:20px; letter-spacing:-.01em}
+  .sn{font-family:'Lora',serif; font-size:15px; color:var(--warm-lt); font-weight:600; min-width:22px}
+  .st{font-family:'Lora',serif; font-weight:500; font-size:20px; letter-spacing:-.01em}
   .sd{font-size:12px; color:var(--warm); margin:-4px 0 12px 33px}
 
   .cell{border-radius:10px; padding:11px 14px; margin:8px 0; font-size:13.5px; position:relative}
@@ -133,8 +133,8 @@
   .capstone{background:var(--ink); color:#fff; border-radius:14px; padding:22px 24px; margin-top:30px; position:relative; overflow:hidden}
   .capstone::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 60%,rgba(0,129,141,.3));pointer-events:none}
   .capstone .kick{color:#7FC3CB}
-  .capstone h2{font-family:'Fraunces',serif; font-weight:500; font-size:23px; margin:4px 0 14px}
-  .oneline{font-family:'Fraunces',serif; font-style:italic; font-size:17px; line-height:1.4; color:#EAF2F1; border-left:3px solid #7FC3CB; padding-left:14px; margin-bottom:16px;position:relative;z-index:1}
+  .capstone h2{font-family:'Lora',serif; font-weight:500; font-size:23px; margin:4px 0 14px}
+  .oneline{font-family:'Lora',serif; font-style:italic; font-size:17px; line-height:1.4; color:#EAF2F1; border-left:3px solid #7FC3CB; padding-left:14px; margin-bottom:16px;position:relative;z-index:1}
   .oneline[contenteditable]:focus{background:rgba(127,195,203,.08);border-radius:5px}
   .oneline:empty::before{content:"One sentence that captures the week…";color:#7e9695;font-style:italic}
   .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;position:relative;z-index:1}
@@ -173,7 +173,7 @@
   .mb{position:fixed;inset:0;background:rgba(20,30,31,.6);display:none;align-items:center;justify-content:center;z-index:900;padding:16px}
   .mb.show{display:flex}
   .mw{background:#fff;border-radius:16px;padding:22px 24px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)}
-  .mw h2{font-family:'Fraunces',serif;font-weight:500;font-size:22px;margin-bottom:4px}
+  .mw h2{font-family:'Lora',serif;font-weight:500;font-size:22px;margin-bottom:4px}
   .mw .desc{font-size:12.5px;color:var(--warm);margin-bottom:18px}
   .mw label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--warm);margin:14px 0 6px}
   .mw input{width:100%;font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;outline:none}
@@ -181,7 +181,7 @@
   .mw .row{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
 
   /* Inline notice in capstone */
-  .pre-prompt{font-family:'Hanken Grotesk',sans-serif;font-style:normal;color:#7e9695;font-size:14px;line-height:1.45}
+  .pre-prompt{font-family:'Montserrat',sans-serif;font-style:normal;color:#7e9695;font-size:14px;line-height:1.45}
 
   @media print{
     .bar,.key,.gear,.foot{display:none}
@@ -197,8 +197,8 @@
   .brandrow{display:flex;align-items:center;gap:14px}
   .pm-logo{width:44px;height:44px;flex:0 0 auto}
   .brandwords .kick{margin-bottom:1px}
-  .brandtitle{font-family:'Fraunces',serif;font-weight:500;font-size:30px;letter-spacing:-.015em;margin:1px 0 0;color:var(--ink);line-height:1.05}
-  .tagline{font-family:'Fraunces',serif;font-style:italic;font-size:15px;color:var(--teal);margin-top:3px}
+  .brandtitle{font-family:'Lora',serif;font-weight:500;font-size:30px;letter-spacing:-.015em;margin:1px 0 0;color:var(--ink);line-height:1.05}
+  .tagline{font-family:'Lora',serif;font-style:italic;font-size:15px;color:var(--teal);margin-top:3px}
   .tabs{display:flex;gap:2px;margin:18px 0 2px;border-bottom:1px solid var(--line);overflow-x:auto}
   .tab{font-family:inherit;font-size:13px;font-weight:600;color:var(--warm);background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;cursor:pointer;white-space:nowrap}
   .tab:hover{color:var(--ink)}
@@ -210,7 +210,7 @@
   .weekhead .wk{color:var(--ink);font-weight:600}
   .weekhead b{color:var(--teal-deep)}
 
-  .dx-lede{font-family:'Fraunces',serif;font-weight:500;font-size:26px;letter-spacing:-.01em;margin:18px 0 5px;color:var(--ink)}
+  .dx-lede{font-family:'Lora',serif;font-weight:500;font-size:26px;letter-spacing:-.01em;margin:18px 0 5px;color:var(--ink)}
   .dx-lede em{font-style:italic;color:var(--teal)}
   .dx-sub{font-size:13px;color:var(--warm);margin-bottom:16px;max-width:64ch;line-height:1.5}
   .dx-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.03);margin-top:14px}
@@ -229,7 +229,7 @@
 
   .dx-buckets{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
   .dx-bucket{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .dx-bhd{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid var(--line);font-family:'Fraunces',serif;font-weight:500;font-size:16px;color:var(--ink)}
+  .dx-bhd{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid var(--line);font-family:'Lora',serif;font-weight:500;font-size:16px;color:var(--ink)}
   .dx-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
   .dx-dot.action{background:var(--teal)} .dx-dot.waiting{background:var(--amber-2)}
   .dx-dot.decision{background:var(--warm)} .dx-dot.fyi{background:var(--amber-lt)}
@@ -269,6 +269,136 @@
   #fatal{display:none;margin:12px 16px;padding:12px 14px;background:#fff5f5;border:1px solid #f3c9c4;border-radius:10px;color:var(--err);font-size:12.5px}
   #fatal pre{white-space:pre-wrap;font-size:11.5px;margin:6px 0 0}
   @media(max-width:680px){.dx-buckets{grid-template-columns:1fr}.dx-row2{grid-template-columns:1fr}.dx-addbar,.dx-addbar.one{grid-template-columns:1fr}.brandtitle{font-size:25px}}
+
+  /* =================== COMMAND CONSOLE REDESIGN =================== */
+  :root{
+    --paper:#F4F0E7; --card:#FBF9F4; --line:#E7E1D3; --hair:#EFE9DE; --ink:#23231F;
+    --teal:#00818D; --teal-deep:#00606A; --warm:#8A7E78; --warm-lt:#A79E97;
+    --amber:#E6A21C; --amber-bg:#FBF6E9;
+    --gold:#FFAC27; --gold-tx:#E6A21C; --purple:#AD60BF; --purple-tx:#8A4197;
+    --green:#96C121; --red:#FB5058; --input:#8A4197;
+  }
+  @keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.35}}
+  body{ background:var(--paper); background-image:radial-gradient(1200px 480px at 78% -8%, rgba(0,129,141,.05), transparent 60%); }
+  .wrap{ max-width:1440px; margin:0 auto; padding:30px 40px 60px; }
+  .weekhead{ display:none; }
+
+  /* header */
+  .cc-header{ position:relative; display:flex; align-items:center; justify-content:space-between; padding-right:30px; }
+  .cc-brand{ display:flex; align-items:center; gap:16px; }
+  .cc-mark{ width:50px; height:50px; border-radius:12px; background:var(--teal); display:flex; align-items:center; justify-content:center; flex:0 0 auto; box-shadow:0 3px 10px rgba(0,129,141,.3); }
+  .cc-mark svg{ width:27px; height:27px; }
+  .cc-kick{ font-size:11px; letter-spacing:.22em; color:var(--teal); font-weight:700; }
+  .cc-name{ font-family:'Lora',serif; font-size:30px; color:var(--ink); line-height:1.05; letter-spacing:-.01em; margin-top:1px; }
+  .cc-tag{ font-family:'Lora',serif; font-style:italic; font-size:15px; color:var(--teal); margin-top:2px; }
+  .cc-right-head{ text-align:right; }
+  .cc-fc{ font-size:11px; letter-spacing:.16em; color:var(--warm-lt); font-weight:700; }
+  .cc-week{ font-family:'Lora',serif; font-size:22px; color:var(--ink); margin-top:3px; }
+  .cc-week b{ font-weight:400; }
+  .cc-header .gear{ position:absolute; top:-4px; right:-6px; font-size:17px; color:var(--warm); background:none; border:0; cursor:pointer; padding:6px; border-radius:8px; }
+  .cc-header .gear:hover{ background:var(--card); color:var(--ink); }
+
+  /* nav */
+  .cc-nav{ display:flex; align-items:center; gap:30px; padding:14px 2px 0; margin:16px 0 24px; border-top:2px solid var(--ink); overflow-x:auto; }
+  .cc-nav .tab{ padding:13px 0; border:0; border-bottom:3px solid transparent; background:none; font-family:'Montserrat',sans-serif; font-size:15px; color:var(--warm); cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:8px; }
+  .cc-nav .tab:hover{ color:var(--ink); }
+  .cc-nav .tab.active{ color:var(--teal); border-bottom-color:var(--teal); font-weight:700; }
+  .cc-nav .cbadge{ font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; color:#F4F0E7; margin:0; }
+  .cb-teal{ background:var(--teal); } .cb-gold{ background:var(--gold-tx); } .cb-purple{ background:var(--purple); }
+  .cc-navstat{ margin-left:auto; font-size:13px; color:var(--warm-lt); white-space:nowrap; padding-left:20px; }
+
+  /* grid */
+  .cc-grid{ display:grid; grid-template-columns:340px 1fr 288px; gap:22px; align-items:start; }
+  .cc-left{ display:flex; flex-direction:column; gap:16px; position:sticky; top:18px; }
+  .cc-center{ min-width:0; }
+  .cc-right{ display:flex; flex-direction:column; gap:14px; position:sticky; top:18px; }
+
+  /* left rail: the action bar becomes the deep-teal "Close the week" card */
+  .cc-left .bar{ background:var(--teal-deep); border:0; border-radius:16px; padding:22px; margin:0; color:#EAF7F8; box-shadow:0 10px 26px rgba(0,96,106,.22); }
+  .cc-left .barhd{ margin-bottom:16px; align-items:flex-start; }
+  .cc-left .barhd .tt{ font-family:'Lora',serif; font-size:24px; font-weight:500; color:#fff; }
+  .cc-left .barhd .meta{ color:#8FC7CD; font-size:11.5px; margin-top:2px; }
+  .cc-left .barhd .meta b{ color:#EAF7F8; font-weight:600; }
+  .cc-left select.hist{ background:rgba(255,255,255,.08); border:1px solid #3D97A1; color:#EAF7F8; min-width:0; }
+  .cc-left .barctl .go.alt{ background:transparent; border:1px solid #3D97A1; color:#EAF7F8; }
+  .cc-left .drop{ border:1.5px dashed #3D97A1; background:rgba(255,255,255,.05); }
+  .cc-left .drop:hover,.cc-left .drop.over,.cc-left .drop.has{ border-color:#8FE0E8; background:rgba(255,255,255,.09); }
+  .cc-left .drop .ti{ color:#EAF7F8; } .cc-left .drop .sb{ color:#8FC7CD; }
+  .cc-left .actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  .cc-left #runBtn{ flex:1 1 100%; justify-content:center; background:#F4F0E7; color:var(--teal-deep); font-weight:800; font-size:15px; padding:14px; }
+  .cc-left #runBtn::before{ content:"▸"; margin-right:7px; }
+  .cc-left #runBtn:hover:not(:disabled){ background:#fff; }
+  .cc-left #runBtn:disabled{ background:rgba(255,255,255,.35); color:#cfeceb; }
+  .cc-left #saveBtn,.cc-left #printBtn{ flex:1; justify-content:center; background:transparent; border:1px solid #3D97A1; color:#EAF7F8; }
+  .cc-left #saveBtn:hover,.cc-left #printBtn:hover{ background:rgba(255,255,255,.08); border-color:#EAF7F8; }
+  .cc-left .status{ color:#96C121; margin-top:16px; }
+  .cc-left .status::before{ content:""; display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--green); margin-right:8px; vertical-align:middle; animation:pulseDot 1.8s infinite; }
+  .cc-left .status.err{ color:#FFB0AE; } .cc-left .status.err::before{ background:var(--red); animation:none; }
+  .cc-left .status.ok{ color:#B7E36B; }
+
+  /* left rail: legend becomes a cream card */
+  .cc-left .key{ display:block; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; margin:0; }
+  .cc-left .key::before{ content:"HOW EACH FIELD FILLS"; display:block; font-size:11px; letter-spacing:.12em; color:var(--warm-lt); font-weight:700; margin-bottom:14px; }
+  .cc-left .kc{ background:none; color:#4A463E; padding:0; margin:0 0 12px; font-size:13px; font-weight:500; border-radius:0; }
+  .cc-left .kc:last-child{ margin-bottom:0; }
+  .cc-left .kc .d{ width:9px; height:9px; }
+  .cc-left .k-auto .d{ background:var(--teal); } .cc-left .k-draft .d{ background:var(--gold-tx); } .cc-left .k-you .d{ background:var(--purple); }
+
+  /* center: sections */
+  .cc-center > section{ margin:0 0 30px; }
+  .cc-center .sh{ align-items:baseline; gap:14px; margin-bottom:14px; }
+  .cc-center .sn{ font-family:'Lora',serif; font-size:52px; font-weight:400; color:#D7CFBE; min-width:auto; line-height:1; }
+  .cc-center .st{ font-family:'Lora',serif; font-weight:500; font-size:28px; color:var(--ink); letter-spacing:-.01em; }
+  .cc-center .sd{ margin:-4px 0 14px 0; font-size:12.5px; }
+  .cell{ background:var(--card); border:1px solid var(--line); border-radius:13px; padding:20px 22px; margin:14px 0; }
+  .cell .lab{ font-size:11px; letter-spacing:.09em; margin-bottom:8px; }
+  .cell .lab .tag{ font-size:9.5px; padding:3px 9px; }
+  .auto{ background:var(--card); border:1px solid var(--line); border-left:5px solid var(--teal); }
+  .auto .lab{ color:var(--teal-deep); } .auto .tag{ background:rgba(0,129,141,.1); color:var(--teal-deep); }
+  .draft{ background:linear-gradient(180deg,#FBF6E9,#FBF9F4); border:1px solid #F6CD80; border-left:5px solid var(--gold-tx); }
+  .draft .lab{ color:#9A6B12; } .draft .tag{ background:#F3E7C6; color:#9A6B12; }
+  .you{ background:var(--card); border:1px solid var(--line); border-left:5px solid var(--purple); }
+  .you .lab{ color:var(--purple-tx); } .you .tag{ background:#F1E2F4; color:var(--purple-tx); }
+  .two{ gap:16px; }
+  .cc-center .foot{ margin-top:22px; font-size:12px; color:var(--warm); }
+
+  /* right rail: live stat cards */
+  .cc-rlabel{ font-size:11px; letter-spacing:.12em; color:var(--warm-lt); font-weight:700; }
+  .cc-stat{ background:var(--card); border:1px solid var(--line); border-top:4px solid var(--teal); border-radius:13px; padding:18px; }
+  .cc-stat-hd{ display:flex; justify-content:space-between; align-items:baseline; }
+  .cc-stat-hd span{ font-weight:700; color:var(--ink); font-size:14px; }
+  .cc-stat-hd b{ font-family:'Lora',serif; font-size:32px; font-weight:400; line-height:1; }
+  .cc-stat-s{ font-size:12px; color:var(--warm); margin-top:5px; line-height:1.5; }
+  .cc-rhint{ font-size:11px; color:var(--warm-lt); line-height:1.5; padding:2px 2px 0; }
+
+  /* keep daily views comfortable at full width */
+  #view-capture,#view-loops,#view-waiting,#view-decisions{ max-width:1080px; }
+
+  @media(max-width:1080px){
+    .cc-grid{ grid-template-columns:1fr; }
+    .cc-left,.cc-right{ position:static; }
+    .wrap{ padding:24px 20px 56px; }
+  }
+  @media print{
+    .cc-nav,.cc-left,.cc-right,.cc-header .gear{ display:none !important; }
+    .cc-grid{ display:block; }
+    .cc-header{ border-bottom:2px solid var(--ink); padding-bottom:12px; }
+  }
+
+  /* ===== settled decisions: close-out + board ===== */
+  .dx-subhd{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--warm-lt); font-weight:700; margin:16px 3px 4px; padding-top:12px; border-top:1px solid var(--line); }
+  .dx-lrow.dx-settled{ opacity:.6; }
+  .dx-tag.done{ background:rgba(150,193,33,.2); color:#5f7d10; }
+  .cc-decboard{ background:var(--card); border:1px solid var(--line); border-left:5px solid var(--purple); border-radius:13px; padding:20px 22px; margin:0 0 22px; }
+  .cc-decboard .hd{ display:flex; align-items:baseline; justify-content:space-between; }
+  .cc-decboard .hd .t{ font-family:'Lora',serif; font-size:20px; color:var(--ink); font-weight:500; }
+  .cc-decboard .hd .n{ font-family:'Lora',serif; font-size:28px; color:var(--purple); }
+  .cc-decboard .cap{ font-size:12px; color:var(--purple-tx); margin:2px 0 10px; }
+  .wk-decitem{ padding:11px 0; border-top:1px solid var(--hair); }
+  .wk-decitem:first-child{ border-top:0; }
+  .wk-decitem .lt{ font-weight:600; font-size:14px; color:var(--ink); }
+  .wk-decitem .cx{ font-size:12.5px; color:var(--warm); margin-top:2px; }
+  .wk-decitem .mt{ font-size:11px; color:var(--warm-lt); margin-top:3px; }
 </style>
 </head>
 <body>
@@ -290,28 +420,33 @@
 <!-- ===== APP ===== -->
 <div id="app" class="wrap" hidden>
 
-  <header class="mast fade brandmast">
+    <header class="cc-header fade">
     <button class="gear" id="gearBtn" title="Settings">⚙</button>
-    <div class="brandrow">
-      <svg class="pm-logo" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Partners Mortgage"><path fill="#00818B" d="M596.662 144.389c34.998-3.172 61.633 12.496 92.264 26.447l92.646 42.659 148.298 67.771c24.231 11.112 55.887 23.912 77.53 38.258 13.33 8.839 24.72 33.444 25.74 49.353 1.78 27.628.95 59.551.93 87.73l-.04 172.002-.01 232.228.09 70.326c.13 33.766 7.63 85.057-38.179 90.057-15.486 1.69-29.669 1.15-45.212 1.13l-74.309-.02-285.711-.03-86.45.01c-14.861.01-38.143-.55-52.35 1.07l-.046-165.707c19.573 1.577 50.149.697 70.701.7l127.415-.019 121.152.044c21.565.013 43.424.502 64.903-.442 18.695-.822 32.803-15.317 34.427-33.722 1.872-21.221 1.396-42.176 1.37-63.418l-.058-96.799.038-113.437c.027-24.681.763-55.347-1.605-79.567-12.076-45.993-37.565-49.775-76.888-67.799l-72.36-33.097-54.019-24.848c-9.531-4.383-22.948-10.989-32.496-14.364a96.2 96.2 0 0 0-33.498-5.572c-25.078.388-42.907 10.519-65.353 20.392l-64.644 28.356-71.674 31.049c-12.541 5.403-30.558 12.592-42.119 18.702a78.6 78.6 0 0 0-19.741 14.962c-9.545 10.062-13.98 19.273-14.725 32.864-1.192 21.728-.655 45.343-.657 67.163l-.011 131.777.001 230.009c.004 39.353-.966 83.426.274 122.493-42.124-2.7-86.002 1.52-128.054-1.62-21.241-1.59-34.093-22.682-35.179-42.768-1.814-33.543-.949-67.966-.947-101.836l-.018-196.325-.042-204.259.009-63.039c.024-39.48-2.981-79.379 39.039-100.877 17.503-8.954 35.936-16.19 53.963-24.053l106.559-46.34 136.739-59.616c29.428-12.846 71.164-34.849 102.307-37.978"/><path fill="#8D807A" d="M595.645 451.22c1.691-.129 3.383-.179 5.078-.229 6.631-.197 13.421-.426 19.841 1.531 14.632 4.461 114.164 49.015 123.352 57.864 10.183 9.808 11.358 21.62 11.657 35.051.863 38.733-.121 77.697-.053 116.46.032 18.651 2.007 48.461-.496 65.954-.65 4.537-2.584 8.555-5.811 11.837-3.556 3.615-7.359 5.308-12.282 6.235-14.533 2.736-30.894 1.266-45.713 1.252l-78.718-.093-88.692.097c-16.25.029-32.393.216-48.658-.311-20.876-.677-25.795-12.942-25.444-31.885.12-6.488-.041-13.959-.045-20.49l.023-61.993-.042-64.309c.007-25.725-5.239-51.071 22.278-64.213 31.426-15.009 63.719-28.079 95.559-42.207 8.45-3.75 19.332-8.5 28.166-10.551"/></svg>
-      <div class="brandwords">
-        <div class="kick">Executive OS</div>
-        <h1 class="brandtitle">Partners Mortgage</h1>
-        <div class="tagline">You matter.</div>
+    <div class="cc-brand">
+      <div class="cc-mark"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Executive OS"><path d="M6 15 L16 6 L26 15" stroke="#F4F0E7" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.6 14 V25 H23.4 V14" stroke="#F4F0E7" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="cc-kick">EXECUTIVE OS</div>
+        <div class="cc-name">Partners Mortgage</div>
+        <div class="cc-tag">You matter.</div>
       </div>
     </div>
+    <div class="cc-right-head">
+      <div class="cc-fc">FRIDAY CLOSEOUT</div>
+      <div class="cc-week"><b id="weekLabel">—</b></div>
+    </div>
   </header>
-  <nav class="tabs fade" id="tabnav" style="animation-delay:.02s" role="tablist">
+  <nav class="cc-nav fade" id="tabnav" role="tablist">
     <button class="tab active" data-view="weekly" role="tab">Weekly Closeout</button>
     <button class="tab" data-view="capture" role="tab">Capture</button>
-    <button class="tab" data-view="loops" role="tab">Open Loops <span class="cbadge" id="cb-loops">0</span></button>
-    <button class="tab" data-view="waiting" role="tab">Waiting On <span class="cbadge" id="cb-waiting">0</span></button>
-    <button class="tab" data-view="decisions" role="tab">Decisions <span class="cbadge" id="cb-decisions">0</span></button>
+    <button class="tab" data-view="loops" role="tab">Open Loops <span class="cbadge cb-teal" id="cb-loops">0</span></button>
+    <button class="tab" data-view="waiting" role="tab">Waiting On <span class="cbadge cb-gold" id="cb-waiting">0</span></button>
+    <button class="tab" data-view="decisions" role="tab">Decisions <span class="cbadge cb-purple" id="cb-decisions">0</span></button>
+    <div class="cc-navstat">Claude gathers · you decide</div>
   </nav>
 
   <div id="view-weekly" class="view active">
-
-  <div class="weekhead fade"><span class="wk">Week of <b id="weekLabel">—</b></span> · Claude drafts from your page + dashboard; your judgment fills the gray.</div>
+  <div class="cc-grid">
+  <aside class="cc-left">
 
   <!-- ACTION BAR -->
   <div class="bar fade" style="animation-delay:.04s">
@@ -333,8 +468,8 @@
     </div>
     <div class="actions">
       <button class="go" id="runBtn" disabled><span id="runLabel">Run Closeout</span></button>
-      <button class="go alt" id="saveBtn">💾 Save</button>
-      <button class="go alt" id="printBtn">🖨 Print</button>
+      <button class="go alt" id="saveBtn">Save</button>
+      <button class="go alt" id="printBtn">Print</button>
     </div>
     <div class="status" id="statusLine">Ready.</div>
   </div>
@@ -344,6 +479,9 @@
     <div class="kc k-draft"><span class="d"></span>Claude drafted — confirm</div>
     <div class="kc k-you"><span class="d"></span>Your call</div>
   </div>
+
+  </aside><!--/cc-left-->
+  <main class="cc-center">
 
   <!-- 1 -->
   <section class="fade" style="animation-delay:.08s">
@@ -496,10 +634,36 @@
     </div>
   </div>
 
+  <div class="cc-decboard">
+    <div class="hd"><span class="t">Decisions settled this week</span><span class="n" id="wk-dec-n">0</span></div>
+    <div class="cap">Closed out in Daily Execution — this week's record</div>
+    <div id="wk-dec-list"></div>
+  </div>
+
   <div class="foot fade" style="animation-delay:.3s">
     Three colors, one principle: <b>Claude gathers, you judge.</b> The blue and amber are filled before you sit down. Your Friday is the gray.
   </div>
 
+  </main><!--/cc-center-->
+
+  <aside class="cc-right">
+    <div class="cc-rlabel">CARRYING INTO NEXT WEEK</div>
+    <div class="cc-stat" style="border-top-color:var(--teal)">
+      <div class="cc-stat-hd"><span>Open Loops</span><b style="color:var(--teal)" id="cc-open-n">0</b></div>
+      <div class="cc-stat-s" id="cc-open-s">Nothing parked yet</div>
+    </div>
+    <div class="cc-stat" style="border-top-color:var(--gold-tx)">
+      <div class="cc-stat-hd"><span>Waiting On</span><b style="color:var(--gold-tx)" id="cc-wait-n">0</b></div>
+      <div class="cc-stat-s" id="cc-wait-s">Nobody owes you right now</div>
+    </div>
+    <div class="cc-stat" style="border-top-color:var(--purple)">
+      <div class="cc-stat-hd"><span>Decisions</span><b style="color:var(--purple)" id="cc-dec-n">0</b></div>
+      <div class="cc-stat-s" id="cc-dec-s">None logged yet</div>
+    </div>
+    <div class="cc-rhint">Live from Daily Execution — today's captures, carried here.</div>
+  </aside>
+
+  </div><!--/cc-grid-->
   </div><!-- /view-weekly -->
 
   <!-- ===== DAILY EXECUTION VIEWS ===== -->
@@ -538,7 +702,7 @@
     <div class="dx-lede">Open loops.</div>
     <div class="dx-sub">Items you parked instead of routing. Your Friday §5 pulls from here — at week-close, promote what still matters into Reminders, or drop what's gone stale.</div>
     <div class="dx-card">
-      <div class="dx-secthd"><strong style="font-family:'Fraunces',serif;font-weight:500;font-size:17px">Still open</strong><span class="r" id="dxLoopsMeta"></span></div>
+      <div class="dx-secthd"><strong style="font-family:'Lora',serif;font-weight:500;font-size:17px">Still open</strong><span class="r" id="dxLoopsMeta"></span></div>
       <div class="dx-list" id="dxLoopsList"></div>
     </div>
   </div>
@@ -1361,12 +1525,13 @@ async function onAppOpen(){
    =================================================================== */
 var DailyOS = (function(){
   /* ---- config (edit to your real Reminders lists + Shortcut) ---- */
-  var SHORTCUT_NAME = "Add to Reminders";
+  var SHORTCUT_NAME = "Add Reminders";                 // matches your live Shortcut
+  var DEFAULT_LIST  = "Process and Categorize";        // your triage dumping ground
   var LIST_GROUPS = [
-    { group:"My Lists",          lists:["Inbox","Today","This Week"] },
-    { group:"TurnKey",           lists:["TurnKey"] },
-    { group:"Partners Mortgage", lists:["PM — Follow Ups","PM — Team","PM — Pipeline"] },
-    { group:"Personal",          lists:["Personal","Family","Errands"] }
+    { group:"My Lists",          lists:["Process and Categorize","General and Recurring"] },
+    { group:"TurnKey",           lists:["Dave and Ryan","Accounting"] },
+    { group:"Partners Mortgage", lists:["Marketing + AI","Daily Partners Tasks","Dan Trinidad","Production Leadership","Recruiting/Growth","Operations","Transition + Reverse","Technology","Onboarding/HR","Calls To Make","Partners Private Capital","All Hands on Deck - Topics","Good Times Crew","Premier Lender Partners","Long Term Projects"] },
+    { group:"Personal",          lists:["Home Chores","Get On The Road","Grocery List","Personal","Movies and Shows","Birthdays + Annys","Tax Strategy","Gifts To Give","Packing List"] }
   ];
 
   var dstate = { parked:[], waiting:[], decisions:[], fyi:[] };
@@ -1395,6 +1560,13 @@ var DailyOS = (function(){
     if(group){ var grp=LIST_GROUPS.filter(function(g){return g.group===group;})[0]; if(grp&&grp.lists[0]) sel.value=grp.lists[0]; }
   }
   function defaultList(group){ var grp=LIST_GROUPS.filter(function(g){return g.group===group;})[0]; return grp?grp.lists[0]:LIST_GROUPS[0].lists[0]; }
+  // Shortcut runs No Alert; we always send a valid date string so its date step never chokes.
+  // Picked date -> that day 9:00 AM; blank -> next Monday 9:00 AM (inert, ignored).
+  function payloadDate(iso){
+    var d = iso ? new Date(iso+"T09:00:00") : (function(){ var x=new Date(); var a=(8-x.getDay())%7; if(a===0) a=7; x.setDate(x.getDate()+a); x.setHours(9,0,0,0); return x; })();
+    var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return M[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear()+" 9:00 AM";
+  }
 
   /* ---- extraction ---- */
   var EXTRACT_PROMPT =
@@ -1415,7 +1587,7 @@ var DailyOS = (function(){
     return {
       actionItems:(Array.isArray(o.actionItems)?o.actionItems:[]).map(function(a){
         var g=groups.indexOf(a.suggestedGroup)>-1?a.suggestedGroup:"My Lists";
-        return { id:uid(), title:a.title||"", date:a.suggestedDate||"", list:defaultList(g), mode:"route" }; }),
+        return { id:uid(), title:a.title||"", date:a.suggestedDate||"", group:g, list:DEFAULT_LIST, mode:"route" }; }),
       waitingOn:(Array.isArray(o.waitingOn)?o.waitingOn:[]).map(function(w){ return { id:uid(), who:w.who||"", what:w.what||"", keep:true }; }),
       decisions:(Array.isArray(o.decisions)?o.decisions:[]).map(function(d){ return { id:uid(), decision:d.decision||"", context:d.context||"", keep:true }; }),
       fyi:(Array.isArray(o.fyi)?o.fyi:[]).map(function(f){ return { id:uid(), note:(f&&f.note)||f||"", keep:false }; })
@@ -1547,7 +1719,7 @@ var DailyOS = (function(){
   function sendReminder(){
     if(!routeCtx) return;
     var title=$("rTitle").value.trim(); if(!title){ toast("Title required"); return; }
-    var payload=[title, $("rDate").value||"", $("rList").value||""].join("|");
+    var payload=[title, payloadDate($("rDate").value), $("rList").value||DEFAULT_LIST].join("|");
     var url="shortcuts://run-shortcut?name="+encodeURIComponent(SHORTCUT_NAME)+"&input=text&text="+encodeURIComponent(payload);
     dsave(); // CRITICAL: flush before navigating away to Safari/Shortcuts
     var after=routeCtx.after; closeRoute();
@@ -1566,7 +1738,7 @@ var DailyOS = (function(){
       var g=document.createElement("div"); g.className="dx-grow";
       g.innerHTML='<div class="lt">'+esc(p.title)+'</div><div class="ld"><span class="dx-tag src">'+esc(p.source||"meeting")+'</span> '+(p.fyi?'<span class="dx-tag ctx">context</span> ':'')+(p.date?'due '+esc(fmtDate(p.date))+' · ':'')+'parked '+esc(fmtDate(p.captured))+'</div>';
       row.appendChild(g);
-      if(!p.fyi){ var pr=document.createElement("button"); pr.className="go small"; pr.type="button"; pr.textContent="Promote"; pr.addEventListener("click",function(){ openRoute({title:p.title,date:p.date,list:p.list||defaultList("My Lists")}, function(){ p.status="promoted"; dsave(); }); }); row.appendChild(pr); }
+      if(!p.fyi){ var pr=document.createElement("button"); pr.className="go small"; pr.type="button"; pr.textContent="Promote"; pr.addEventListener("click",function(){ openRoute({title:p.title,date:p.date,list:p.list||DEFAULT_LIST}, function(){ p.status="promoted"; dsave(); }); }); row.appendChild(pr); }
       var dr=document.createElement("button"); dr.className="go alt small"; dr.type="button"; dr.textContent="Drop"; dr.addEventListener("click",function(){ p.status="dropped"; dsave(); }); row.appendChild(dr);
       list.appendChild(row);
     });
@@ -1587,21 +1759,65 @@ var DailyOS = (function(){
   function renderDecisions(){
     var list=$("dxDecList"); list.innerHTML="";
     if(!dstate.decisions.length){ list.appendChild(emptyRow("No decisions logged yet.")); return; }
-    dstate.decisions.slice().reverse().forEach(function(d){
-      var row=document.createElement("div"); row.className="dx-lrow";
-      var g=document.createElement("div"); g.className="dx-grow";
-      g.innerHTML='<div class="lt">'+esc(d.decision)+'</div><div class="ld"><span class="dx-tag src">'+esc(d.source||"manual")+'</span> '+esc(fmtDate(d.date))+(d.context?' · '+esc(d.context):'')+'</div>';
-      row.appendChild(g); list.appendChild(row);
-    });
+    var active=dstate.decisions.filter(function(d){return d.status!=="settled";});
+    var settled=dstate.decisions.filter(function(d){return d.status==="settled";});
+    active.slice().reverse().forEach(function(d){ list.appendChild(decRow(d,false)); });
+    if(settled.length){
+      var hd=document.createElement("div"); hd.className="dx-subhd"; hd.textContent="Settled \u00b7 on the board";
+      list.appendChild(hd);
+      settled.slice().reverse().forEach(function(d){ list.appendChild(decRow(d,true)); });
+    }
+  }
+  function decRow(d, isSettled){
+    var row=document.createElement("div"); row.className="dx-lrow"+(isSettled?" dx-settled":"");
+    var g=document.createElement("div"); g.className="dx-grow";
+    var meta='<span class="dx-tag src">'+esc(d.source||"manual")+'</span> '+esc(fmtDate(d.date))+(d.context?' \u00b7 '+esc(d.context):'');
+    if(isSettled) meta+=' <span class="dx-tag done">settled '+esc(fmtDate(d.settledOn||d.date))+'</span>';
+    g.innerHTML='<div class="lt">'+esc(d.decision)+'</div><div class="ld">'+meta+'</div>';
+    row.appendChild(g);
+    if(isSettled){
+      var rb=document.createElement("button"); rb.className="go alt small"; rb.type="button"; rb.textContent="Reopen";
+      rb.addEventListener("click",function(){ delete d.status; delete d.settledOn; dsave(); }); row.appendChild(rb);
+    } else {
+      var cb=document.createElement("button"); cb.className="go small"; cb.type="button"; cb.textContent="Close out";
+      cb.addEventListener("click",function(){ d.status="settled"; d.settledOn=todayISO(); dsave(); toast("Settled \u2014 on the board"); }); row.appendChild(cb);
+    }
+    return row;
   }
   function emptyRow(t){ var d=document.createElement("div"); d.className="dx-empty"; d.style.padding="24px"; d.textContent=t; return d; }
+  function renderSettledBoard(){
+    var host=$("wk-dec-list"); if(!host) return;
+    var now=Date.now(), wk=7*24*3600*1000;
+    var recent=dstate.decisions.filter(function(d){
+      if(d.status!=="settled") return false;
+      var t=Date.parse((d.settledOn||d.date||"")+"T00:00:00");
+      return isNaN(t) || (now-t)<=wk;
+    });
+    var nEl=$("wk-dec-n"); if(nEl) nEl.textContent=recent.length;
+    host.innerHTML="";
+    if(!recent.length){ var e=document.createElement("div"); e.className="dx-empty"; e.style.padding="12px 2px"; e.textContent="Nothing settled this week yet \u2014 close out a decision in Daily Execution and it lands here."; host.appendChild(e); return; }
+    recent.slice().reverse().forEach(function(d){
+      var it=document.createElement("div"); it.className="wk-decitem";
+      it.innerHTML='<div class="lt">'+esc(d.decision)+'</div>'+(d.context?'<div class="cx">'+esc(d.context)+'</div>':'')+'<div class="mt">settled '+esc(fmtDate(d.settledOn||d.date))+(d.source?' \u00b7 '+esc(d.source):'')+'</div>';
+      host.appendChild(it);
+    });
+  }
 
   function renderAll(){
-    renderLoops(); renderWaiting(); renderDecisions();
+    renderLoops(); renderWaiting(); renderDecisions(); renderSettledBoard();
     var cl=$("cb-loops"), cw=$("cb-waiting"), cd=$("cb-decisions");
     if(cl) cl.textContent=dstate.parked.filter(function(p){return p.status==="parked";}).length;
     if(cw) cw.textContent=dstate.waiting.filter(function(w){return w.status!=="resolved";}).length;
     if(cd) cd.textContent=dstate.decisions.length;
+    var setTxt=function(id,v){ var e=$(id); if(e) e.textContent=v; };
+    var on=dstate.parked.filter(function(p){return p.status==="parked";});
+    var wa=dstate.waiting.filter(function(w){return w.status!=="resolved";});
+    setTxt("cc-open-n", on.length);
+    setTxt("cc-open-s", on.slice(0,4).map(function(p){return p.title;}).join("  ·  ")||"Nothing parked yet");
+    setTxt("cc-wait-n", wa.length);
+    setTxt("cc-wait-s", wa.slice(0,4).map(function(w){return w.who||w.what;}).join("  ·  ")||"Nobody owes you right now");
+    setTxt("cc-dec-n", dstate.decisions.length);
+    setTxt("cc-dec-s", dstate.decisions.slice(-4).reverse().map(function(d){return d.decision;}).join("  ·  ")||"None logged yet");
   }
 
   /* ---- weekly bridge: pull parked loops into §5 ---- */
