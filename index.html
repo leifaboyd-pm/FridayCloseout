@@ -410,7 +410,12 @@
   .brain-row .bl{ font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--teal-deep); margin-right:5px; }
   .brain-row a{ color:var(--teal-deep); }
 
-  /* ===== batch reconcile ===== */
+  /* ===== Fieldy progress bar ===== */
+  .fieldy-bar-track{ width:100%; height:6px; background:var(--line); border-radius:99px; overflow:hidden; }
+  .fieldy-bar-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--teal),var(--green)); border-radius:99px; transition:width 1.2s ease; }
+  @keyframes barPulse{ 0%,100%{opacity:1} 50%{opacity:.6} }
+  #dxFieldyProgress .spin{ border-top-color:var(--teal); animation:spin .8s linear infinite; }
+</style>
   .batch-row{ display:flex; align-items:center; gap:11px; padding:10px 4px;
     border-bottom:1px solid var(--hair); cursor:pointer; font-size:13.5px; color:var(--ink); }
   .batch-row:last-child{ border-bottom:0; }
@@ -697,7 +702,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:10px">
           <button class="go alt small" id="dxPull" type="button">Get outstanding meetings</button>
-          <span class="dx-hint" id="dxPullMsg"></span>
+          <span class="dx-hint" id="dxPullMsg" style="margin-left:4px;font-size:13px;font-weight:600;color:var(--teal)"></span>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <label style="font-size:12px;color:var(--warm);cursor:pointer"><input type="checkbox" id="dxSelectAll" style="margin-right:4px">Select all</label>
@@ -724,6 +729,10 @@
         <input type="hidden" id="dxSource" value="paste">
         <button class="go" id="dxExtract">Reconcile</button>
         <button class="go alt small" id="dxClear">Clear</button>
+      </div>
+      <div id="dxFieldyProgress" style="display:none;margin-top:12px">
+        <div class="fieldy-bar-track"><div class="fieldy-bar-fill" id="dxFieldyBar"></div></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:7px"><span class="spin" style="width:14px;height:14px;border-width:2px"></span><span id="dxFieldyMsg" style="font-size:12.5px;color:var(--teal);font-weight:600"></span></div>
       </div>
       <div id="dxResults" style="display:none">
         <div class="dx-buckets" style="margin-top:14px">
@@ -1670,17 +1679,25 @@ var DailyOS = (function(){
   }
 
   /* ---- capture flow ---- */
-  function progress(on,main,sub){ var p=$("dxProgress"); if(on){ p.classList.add("show"); $("dxPMain").textContent=main||"Reading the meeting…"; $("dxPSub").textContent=sub||""; } else p.classList.remove("show"); }
+  function fieldyProgress(on, msg){
+    var fp=$("dxFieldyProgress"), fm=$("dxFieldyMsg"), fb=$("dxFieldyBar");
+    if(!fp) return;
+    fp.style.display=on?"block":"none";
+    if(fm) fm.textContent=msg||"";
+    if(fb){ fb.style.width="0%"; if(on){ setTimeout(function(){ fb.style.width="35%"; },100); setTimeout(function(){ fb.style.width="65%"; },1800); setTimeout(function(){ fb.style.width="85%"; },4000); } else { fb.style.width="100%"; setTimeout(function(){ fb.style.width="0%"; fp.style.display="none"; },400); } }
+  }
+  function progress(on,main,sub){ var p=$("dxProgress"); if(!p) return; if(on){ p.style.display="flex"; $("dxPMain").textContent=main||"Reading the meeting\u2026"; $("dxPSub").textContent=sub||""; } else p.style.display="none"; }
 
   function runExtract(){
     var truth=$("dxText").value.trim(), notes=$("dxNotes")?$("dxNotes").value.trim():"";
     if(!truth){ toast("Paste the meeting summary / transcript first"); return; }
     lastInput={ title:($("dxTitle").value||"").trim(), date:$("dxDate").value||todayISO(), url:($("dxUrl")?$("dxUrl").value.trim():""), source:($("dxSource")?$("dxSource").value:"paste"), granolaId:(pickedGranolaId||""), notes:notes, truth:truth };
     $("dxExtract").disabled=true;
-    var done=function(res,via){ pending=res; progress(false); $("dxExtract").disabled=false; renderResults(); $("dxResults").style.display="block"; toast(via||"Reconciled"); $("dxResults").scrollIntoView({behavior:"smooth",block:"start"}); };
-    var fallback=function(){ progress(true,"Reading on-device…","Splitting by section headers"); setTimeout(function(){ try{ done(heuristicExtract(truth),"Parsed on-device"); }catch(e){ progress(false); $("dxExtract").disabled=false; window.__fatal("Reconcile failed",e.stack); } },400); };
+    var done=function(res,via){ pending=res; progress(false); fieldyProgress(false); $("dxExtract").disabled=false; renderResults(); $("dxResults").style.display="block"; toast(via||"Reconciled"); $("dxResults").scrollIntoView({behavior:"smooth",block:"start"}); };
+    var fallback=function(){ fieldyProgress(true,"Reading on-device…"); setTimeout(function(){ try{ done(heuristicExtract(truth),"Parsed on-device"); }catch(e){ progress(false); fieldyProgress(false); $("dxExtract").disabled=false; window.__fatal("Reconcile failed",e.stack); } },400); };
     if(!settings.apiKey){ fallback(); return; }
-    progress(true,"Reconciling your notes against the meeting…","Surfacing what you did not write down");
+    fieldyProgress(true,"Claude is reading the meeting — this takes 10–20 seconds…");
+    progress(false);
     callExtract(notes,truth).then(function(res){ done(res); }).catch(function(e){ console.warn("reconcile",e); fallback(); });
   }
 
