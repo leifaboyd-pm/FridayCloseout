@@ -2085,11 +2085,13 @@ var DailyOS = (function(){
     $("dxExtract").addEventListener("click",runExtract);
     $("dxCommit").addEventListener("click",commit);
     $("dxClear").addEventListener("click",function(){ $("dxText").value=""; $("dxTitle").value=""; resetCapture(); });
-    $("dxSample").addEventListener("click",function(){ $("dxTitle").value="Pipeline review — Dan"; $("dxText").value=SAMPLE; toast("Sample loaded"); });
+    var smp=$("dxSample"); if(smp) smp.addEventListener("click",function(){ $("dxTitle").value="Pipeline review — Dan"; $("dxText").value=SAMPLE; toast("Sample loaded"); });
     var drop=$("dxDrop");
+    if(drop){
     ["dragenter","dragover"].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.add("over"); }); });
     ["dragleave","drop"].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.remove("over"); }); });
     drop.addEventListener("drop",function(e){ var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(!f) return; var r=new FileReader(); r.onload=function(){ $("dxText").value=String(r.result||""); if(!$("dxTitle").value) $("dxTitle").value=f.name.replace(/\.[^.]+$/,""); toast("File loaded"); }; r.readAsText(f); });
+    }
     $("rCancel").addEventListener("click",function(){ var after=routeCtx&&routeCtx.after; closeRoute(); if(after) after(); });
     $("rSend").addEventListener("click",sendReminder);
     $("routeModal").addEventListener("click",function(e){ if(e.target===$("routeModal")) $("rCancel").click(); });
