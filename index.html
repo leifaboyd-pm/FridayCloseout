@@ -763,8 +763,6 @@
     <div class="desc">Anthropic key is stored in your private Firestore. PIN gates this panel and the closeout itself.</div>
     <label>Anthropic API key</label>
     <input id="apiKeyInput" type="password" placeholder="sk-ant-…">
-    <label>Granola API key</label>
-    <input id="granolaKeyInput" type="password" placeholder="grn_…">
     <label>PIN (4–6 digits)</label>
     <input id="pinChangeInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="leave blank to keep">
     <label>Week label (override)</label>
@@ -831,7 +829,6 @@ async function loadSettings(){
     if(doc.exists){
       const d = doc.data();
       settings.apiKey = d.apiKey || "";
-      settings.granolaKey = d.granolaKey || "";
       settings.pin = d.pin || DEFAULT_PIN;
       settings.weekOverride = d.weekOverride || "";
     }
@@ -1503,7 +1500,6 @@ document.getElementById("printBtn").addEventListener("click", ()=> window.print(
 const settingsModal = document.getElementById("settingsModal");
 document.getElementById("gearBtn").addEventListener("click", ()=>{
   document.getElementById("apiKeyInput").value = settings.apiKey || "";
-  document.getElementById("granolaKeyInput").value = settings.granolaKey || "";
   document.getElementById("pinChangeInput").value = "";
   document.getElementById("weekOverride").value = settings.weekOverride || "";
   settingsModal.classList.add("show");
@@ -1511,7 +1507,6 @@ document.getElementById("gearBtn").addEventListener("click", ()=>{
 document.getElementById("settingsCancel").addEventListener("click", ()=> settingsModal.classList.remove("show"));
 document.getElementById("settingsSave").addEventListener("click", async ()=>{
   settings.apiKey = document.getElementById("apiKeyInput").value.trim();
-  settings.granolaKey = document.getElementById("granolaKeyInput").value.trim();
   const newPin = document.getElementById("pinChangeInput").value.trim();
   if(newPin){
     if(!/^\d{4,6}$/.test(newPin)){ alert("PIN must be 4–6 digits."); return; }
@@ -1571,6 +1566,7 @@ var DailyOS = (function(){
   var dstate = { parked:[], waiting:[], decisions:[], fyi:[] };
   var pending = null, routeCtx = null, routeQueue = [], booted = false;
   var lastInput=null, corpus=[], pickedGranolaId="", granolaCache=[];
+  var GRANOLA_GW="https://granola-relay-200320219316.us-west1.run.app/granola";
 
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -1874,37 +1870,21 @@ var DailyOS = (function(){
 
   function pullGranola(){
     var msg=$("dxPullMsg"), btn=$("dxPull");
-    if(!settings.apiKey){ if(msg) msg.textContent="Add your Anthropic key in Settings first."; return; }
-    if(!settings.granolaKey){ if(msg) msg.textContent="Add your Granola key in Settings first."; return; }
-    if(btn) btn.disabled=true; if(msg) msg.textContent="Asking Claude to pull from Granola\u2026";
-    fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{ "x-api-key":settings.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true", "anthropic-beta":"mcp-client-2025-11-20", "Content-Type":"application/json" },
-      body:JSON.stringify({
-        model:MODEL, max_tokens:8000,
-        mcp_servers:[{ type:"url", url:"https://mcp.granola.ai/mcp", name:"granola", authorization_token:settings.granolaKey }],
-        tools:[{ type:"mcp_toolset", mcp_server_name:"granola" }],
-        messages:[{ role:"user", content:"Use the Granola tools to list my real meetings from the last 14 days that have an AI summary. Skip junk like New note, Short recording, Get started with Granola, and personal or shortcut notes. Return ONLY a JSON array, no prose, each item exactly: {\"id\":\"meeting id\",\"title\":\"\",\"date\":\"YYYY-MM-DD\",\"summary\":\"the full AI summary text\"}." }]
+    if(btn) btn.disabled=true; if(msg) msg.textContent="Pulling from Granola\u2026";
+    var since=new Date(Date.now()-14*24*3600*1000).toISOString();
+    fetch(GRANOLA_GW+"/v1/notes?created_after="+encodeURIComponent(since))
+      .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(r.status+" "+t.slice(0,140)); }); return r.json(); })
+      .then(function(d){
+        if(btn) btn.disabled=false;
+        var notes=(d&&d.notes)||[]; var seen={}; corpus.forEach(function(m){ if(m.granola_id) seen[m.granola_id]=1; });
+        var open=notes.filter(function(n){ return !seen[n.id]; });
+        if(msg) msg.textContent=open.length+" ready \u00b7 "+(notes.length-open.length)+" already reconciled";
+        renderPickList(open);
       })
-    })
-    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(r.status+" "+t.slice(0,200)); }); return r.json(); })
-    .then(function(d){
-      if(btn) btn.disabled=false;
-      var text=(d.content||[]).filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join("\n");
-      var a=text.indexOf("["), z=text.lastIndexOf("]");
-      if(a<0||z<0) throw new Error("no meetings returned: "+text.slice(0,160));
-      var arr=JSON.parse(text.slice(a,z+1));
-      granolaCache=arr;
-      var seen={}; corpus.forEach(function(m){ if(m.granola_id) seen[m.granola_id]=1; });
-      var open=arr.filter(function(n){ return !seen[n.id]; });
-      if(msg) msg.textContent=open.length+" ready \u00b7 "+(arr.length-open.length)+" already reconciled";
-      renderPickList(open);
-    })
-    .catch(function(e){
-      if(btn) btn.disabled=false; console.warn("granola pull",e);
-      var m=(e.message||"error");
-      if(msg) msg.textContent="Pull failed ("+m+"). If it mentions authorization, the grn_ key isn't valid for the MCP \u2014 tell me and we'll switch to the worker route.";
-    });
+      .catch(function(e){
+        if(btn) btn.disabled=false; console.warn("granola pull",e);
+        if(msg) msg.textContent="Relay didn't answer ("+(e.message||"error")+"). Check that the Cloud Run service is running.";
+      });
   }
   function renderPickList(notes){
     var host=$("dxPickList"); if(!host) return;
@@ -1912,21 +1892,29 @@ var DailyOS = (function(){
     notes.forEach(function(n){
       var b=document.createElement("button"); b.className="go alt small"; b.type="button";
       b.style.cssText="display:block;width:100%;text-align:left;margin:5px 0";
-      var dt=(n.date||"").slice(0,10);
+      var dt=(n.created_at||n.created||n.date||"").slice(0,10);
       b.textContent=(n.title||"Untitled")+(dt?"  \u00b7  "+fmtDate(dt):"");
       b.addEventListener("click",function(){ pickGranola(n.id); });
       host.appendChild(b);
     });
   }
   function pickGranola(id){
-    var n=granolaCache.filter(function(x){return x.id===id;})[0]; if(!n) return;
-    $("dxText").value=n.summary||"";
-    $("dxTitle").value=n.title||"";
-    if($("dxDate")) $("dxDate").value=(n.date||"").slice(0,10);
-    if($("dxSource")) $("dxSource").value="granola";
-    pickedGranolaId=id;
-    var msg=$("dxPullMsg"); if(msg) msg.textContent="Loaded \u2014 add your own notes above for the sharper diff, then Reconcile.";
-    $("dxText").scrollIntoView({behavior:"smooth",block:"center"});
+    var msg=$("dxPullMsg");
+    if(msg) msg.textContent="Loading meeting\u2026";
+    fetch(GRANOLA_GW+"/v1/notes/"+encodeURIComponent(id)+"?include=transcript")
+      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(n){
+        var tx=Array.isArray(n.transcript)?n.transcript.map(function(u){return (u.text||"");}).join(" "):"";
+        $("dxText").value=(n.summary||"")+(tx?"\n\nTRANSCRIPT:\n"+tx:"");
+        $("dxTitle").value=n.title||"";
+        if($("dxDate")) $("dxDate").value=(n.created_at||n.created||n.date||"").slice(0,10);
+        if($("dxUrl")) $("dxUrl").value=n.url||n.share_url||"";
+        if($("dxSource")) $("dxSource").value="granola";
+        pickedGranolaId=id;
+        var msg=$("dxPullMsg"); if(msg) msg.textContent="Loaded \u2014 add your own notes above for the sharper diff, then Reconcile.";
+        $("dxText").scrollIntoView({behavior:"smooth",block:"center"});
+      })
+      .catch(function(e){ if(msg) msg.textContent="Couldn't load that meeting ("+(e.message||"error")+")."; });
   }
   function archiveMeeting(){
     if(!lastInput) return;
