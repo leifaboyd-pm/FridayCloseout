@@ -409,6 +409,17 @@
   .brain-row .bg{ font-size:12.5px; color:var(--warm); margin-top:6px; }
   .brain-row .bl{ font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--teal-deep); margin-right:5px; }
   .brain-row a{ color:var(--teal-deep); }
+
+  /* ===== batch reconcile ===== */
+  .batch-row{ display:flex; align-items:center; gap:11px; padding:10px 4px;
+    border-bottom:1px solid var(--hair); cursor:pointer; font-size:13.5px; color:var(--ink); }
+  .batch-row:last-child{ border-bottom:0; }
+  .batch-row:hover{ background:rgba(0,129,141,.04); border-radius:7px; }
+  .batch-cb{ width:16px; height:16px; accent-color:var(--teal); cursor:pointer; flex:0 0 auto; }
+  .batch-result-card{ border-left:4px solid var(--teal); }
+  .batch-card-hd{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .batch-card-title{ font-family:'Lora',serif; font-weight:500; font-size:17px; color:var(--ink); }
+  .batch-card-date{ font-size:11.5px; color:var(--warm-lt); }
 </style>
 </head>
 <body>
@@ -679,40 +690,52 @@
 
   <!-- ===== DAILY EXECUTION VIEWS ===== -->
   <div id="view-capture" class="view">
-    <div class="dx-lede">Reconcile a meeting. <em>Surface what you missed.</em></div>
-    <div class="dx-sub">Claude compares your own notes against what the meeting actually contained and surfaces the <em>delta</em> — the commitments you made but didn't write down. High-level tasks only; decisions get archived to the Brain, not dumped in front of you.</div>
+    <div class="dx-lede">Reconcile. <em>Surface what you missed.</em></div>
+    <div class="dx-sub">Check the meetings you want. Hit Reconcile. Claude diffs each one and surfaces only the delta — the commitments you made but didn't write down. You never need to read the notes.</div>
+
     <div class="dx-card">
-      <div class="dx-row2">
-        <div><label class="dx-lab">Meeting</label><input type="text" id="dxTitle" placeholder="e.g. Pipeline review with Dan"></div>
-        <div><label class="dx-lab">Date</label><input type="date" id="dxDate"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="go alt small" id="dxPull" type="button">Get outstanding meetings</button>
+          <span class="dx-hint" id="dxPullMsg"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:12px;color:var(--warm);cursor:pointer"><input type="checkbox" id="dxSelectAll" style="margin-right:4px">Select all</label>
+          <button class="go" id="dxBatchBtn" disabled style="min-width:160px">Reconcile selected</button>
+        </div>
       </div>
-      <div id="dxGranolaBar" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)">
-        <button class="go alt small" id="dxPull" type="button">Get outstanding meetings</button>
-        <span class="dx-hint" id="dxPullMsg" style="margin-left:10px"></span>
-        <div id="dxPickList" style="margin-top:10px;display:none"></div>
+      <div id="dxPickList" style="display:none"></div>
+      <div class="dx-progress" id="dxProgress" style="display:none">
+        <span class="spin"></span>
+        <div><span id="dxPMain">Reconciling…</span><small id="dxPSub"></small></div>
       </div>
-      <div class="dx-row2" style="margin-bottom:12px"><div><label class="dx-lab">Source</label><select id="dxSource"><option value="granola">Granola</option><option value="fieldy">Fieldy</option><option value="paste">Paste</option></select></div><div><label class="dx-lab">Meeting URL (optional)</label><input type="text" id="dxUrl" placeholder="notes.granola.ai/… or Fieldy link"></div></div>
-      <label class="dx-lab">Your notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--warm)">— what you typed during the meeting (leave blank for a Fieldy paste)</span></label>
-      <textarea id="dxNotes" placeholder="Paste the notes you typed yourself…" style="width:100%;min-height:92px;font-family:inherit;font-size:14px;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;resize:vertical;margin-bottom:12px;color:var(--ink)"></textarea>
-      <label class="dx-lab">Ground truth <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--warm)">— Granola summary / transcript, or a Fieldy conversation</span></label>
-      <div class="dx-drop" id="dxDrop"><textarea id="dxText" placeholder="Paste the Granola summary / transcript, or a Fieldy conversation…"></textarea></div>
-      <div class="dx-actions" style="margin-top:12px">
+    </div>
+
+    <div id="dxBatchResults"></div>
+
+    <div class="dx-card" style="margin-top:16px">
+      <div class="dx-secthd" style="margin-bottom:10px"><strong style="font-family:'Lora',serif;font-weight:500;font-size:15px">Paste a Fieldy conversation</strong><span class="r" style="font-size:11px;color:var(--warm)">paste-only</span></div>
+      <textarea id="dxText" placeholder="Paste a Fieldy conversation or any other meeting text…" style="width:100%;min-height:100px;font-family:inherit;font-size:13px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;resize:vertical;color:var(--ink);margin-bottom:10px"></textarea>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="dxTitle" placeholder="Meeting name (optional)" style="flex:1;font-family:inherit;font-size:13px;padding:8px 11px;border:1px solid var(--line);border-radius:7px;color:var(--ink)">
+        <input type="date" id="dxDate" style="font-family:inherit;font-size:13px;padding:8px 11px;border:1px solid var(--line);border-radius:7px;color:var(--ink)">
+        <input type="hidden" id="dxNotes" value="">
+        <input type="hidden" id="dxUrl" value="">
+        <input type="hidden" id="dxSource" value="paste">
         <button class="go" id="dxExtract">Reconcile</button>
-        <button class="go alt small" id="dxSample">Load a sample</button>
         <button class="go alt small" id="dxClear">Clear</button>
       </div>
-      <div class="dx-progress" id="dxProgress"><span class="spin"></span><div><span id="dxPMain">Reading the meeting…</span><small id="dxPSub">Sorting commitments into buckets</small></div></div>
-    </div>
-    <div id="dxResults" style="display:none">
-      <div class="dx-buckets">
-        <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot action"></span>Commitments you didn't write down</div><div class="dx-bd" id="dxBAction"></div></div>
-        <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot waiting"></span>Waiting on</div><div class="dx-bd" id="dxBWaiting"></div></div>
-        <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot decision"></span>Decisions</div><div class="dx-bd" id="dxBDecision"></div></div>
-        <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot fyi"></span>FYI / context</div><div class="dx-bd" id="dxBFyi"></div></div>
-      </div>
-      <div class="dx-card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <div class="dx-hint">Route action items now, or park them for the Friday Open Loop Audit. Waiting-on and decisions save to their lists.</div>
-        <button class="go" id="dxCommit">Commit this meeting</button>
+      <div id="dxResults" style="display:none">
+        <div class="dx-buckets" style="margin-top:14px">
+          <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot action"></span>Commitments you didn't write down</div><div class="dx-bd" id="dxBAction"></div></div>
+          <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot waiting"></span>Waiting on</div><div class="dx-bd" id="dxBWaiting"></div></div>
+          <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot decision"></span>Decisions</div><div class="dx-bd" id="dxBDecision"></div></div>
+          <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot fyi"></span>FYI / context</div><div class="dx-bd" id="dxBFyi"></div></div>
+        </div>
+        <div class="dx-card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px">
+          <div class="dx-hint">Route action items now, or park them for the Friday Open Loop Audit.</div>
+          <button class="go" id="dxCommit">Commit this meeting</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1890,31 +1913,114 @@ var DailyOS = (function(){
     var host=$("dxPickList"); if(!host) return;
     host.innerHTML=""; host.style.display=notes.length?"block":"none";
     notes.forEach(function(n){
-      var b=document.createElement("button"); b.className="go alt small"; b.type="button";
-      b.style.cssText="display:block;width:100%;text-align:left;margin:5px 0";
+      var row=document.createElement("label"); row.className="batch-row";
+      var cb=document.createElement("input"); cb.type="checkbox"; cb.value=n.id; cb.className="batch-cb";
+      cb.setAttribute("data-title",n.title||"Untitled"); cb.setAttribute("data-date",(n.created_at||n.created||n.date||"").slice(0,10));
+      cb.addEventListener("change",updateBatchBtn);
       var dt=(n.created_at||n.created||n.date||"").slice(0,10);
-      b.textContent=(n.title||"Untitled")+(dt?"  \u00b7  "+fmtDate(dt):"");
-      b.addEventListener("click",function(){ pickGranola(n.id); });
-      host.appendChild(b);
+      var span=document.createElement("span"); span.textContent=(n.title||"Untitled")+(dt?"  \u00b7  "+fmtDate(dt):"");
+      row.appendChild(cb); row.appendChild(span); host.appendChild(row);
     });
+    updateBatchBtn();
   }
-  function pickGranola(id){
-    var msg=$("dxPullMsg");
-    if(msg) msg.textContent="Loading meeting\u2026";
-    fetch(GRANOLA_GW+"/v1/notes/"+encodeURIComponent(id)+"?include=transcript")
+  function updateBatchBtn(){
+    var checked=document.querySelectorAll(".batch-cb:checked").length;
+    var btn=$("dxBatchBtn"); if(!btn) return;
+    btn.disabled=checked===0;
+    btn.textContent=checked?"Reconcile "+checked+" meeting"+(checked===1?"":"s"):"Reconcile selected";
+  }
+  function fetchGranolaNote(id){
+    return fetch(GRANOLA_GW+"/v1/notes/"+encodeURIComponent(id)+"?include=transcript")
       .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
       .then(function(n){
         var tx=Array.isArray(n.transcript)?n.transcript.map(function(u){return (u.text||"");}).join(" "):"";
-        $("dxText").value=(n.summary||"")+(tx?"\n\nTRANSCRIPT:\n"+tx:"");
-        $("dxTitle").value=n.title||"";
-        if($("dxDate")) $("dxDate").value=(n.created_at||n.created||n.date||"").slice(0,10);
-        if($("dxUrl")) $("dxUrl").value=n.url||n.share_url||"";
-        if($("dxSource")) $("dxSource").value="granola";
-        pickedGranolaId=id;
-        var msg=$("dxPullMsg"); if(msg) msg.textContent="Loaded \u2014 add your own notes above for the sharper diff, then Reconcile.";
-        $("dxText").scrollIntoView({behavior:"smooth",block:"center"});
-      })
-      .catch(function(e){ if(msg) msg.textContent="Couldn't load that meeting ("+(e.message||"error")+")."; });
+        return { id:id, title:n.title||"Untitled", date:(n.created_at||n.created||n.date||"").slice(0,10),
+                 url:n.url||n.share_url||"", truth:(n.summary||"")+(tx?"\n\nTRANSCRIPT:\n"+tx:"") };
+      });
+  }
+  function runBatchReconcile(){
+    var cbs=Array.from(document.querySelectorAll(".batch-cb:checked"));
+    if(!cbs.length){ toast("Check at least one meeting"); return; }
+    var ids=cbs.map(function(c){return c.value;});
+    var host=$("dxBatchResults"); host.innerHTML="";
+    var btn=$("dxBatchBtn"); if(btn) btn.disabled=true;
+    var prog=$("dxProgress"); if(prog) prog.style.display="flex";
+    var done=0, total=ids.length;
+    function setStatus(t,s){ var m=$("dxPMain"), sb=$("dxPSub"); if(m) m.textContent=t; if(sb) sb.textContent=s||""; }
+    setStatus("Reconciling meeting 1 of "+total+"\u2026","Fetching from Granola");
+    function next(i){
+      if(i>=ids.length){
+        if(prog) prog.style.display="none";
+        if(btn){ btn.disabled=false; btn.textContent="Reconcile selected"; }
+        toast("Done \u2014 "+total+" meeting"+(total===1?"":"s")+" reconciled");
+        return;
+      }
+      setStatus("Reconciling "+(i+1)+" of "+total+"\u2026","Fetching from Granola");
+      fetchGranolaNote(ids[i]).then(function(note){
+        setStatus("Reconciling "+(i+1)+" of "+total+"\u2026","Claude is reading the meeting");
+        return callExtract("", note.truth).then(function(res){
+          done++;
+          renderBatchCard(host, note, res);
+          next(i+1);
+        });
+      }).catch(function(e){
+        done++;
+        var errCard=document.createElement("div"); errCard.className="dx-card";
+        errCard.style.cssText="margin-bottom:14px;border-left:4px solid var(--red)";
+        errCard.innerHTML="<div style='font-weight:700;color:var(--red)'>Failed: "+esc(ids[i])+"</div><div style='font-size:12px;color:var(--warm);margin-top:4px'>"+esc(e.message)+"</div>";
+        host.appendChild(errCard);
+        next(i+1);
+      });
+    }
+    next(0);
+  }
+  function renderBatchCard(host, note, res){
+    var card=document.createElement("div"); card.className="dx-card batch-result-card"; card.style.marginBottom="16px";
+    var titleBar='<div class="batch-card-hd"><span class="batch-card-title">'+esc(note.title)+'</span><span class="batch-card-date">'+esc(fmtDate(note.date))+'</span></div>';
+    card.innerHTML=titleBar;
+    var buckets=document.createElement("div"); buckets.className="dx-buckets"; buckets.style.marginTop="10px";
+    var tmpPending=res;
+    var aDiv=document.createElement("div"); aDiv.className="dx-bucket";
+    aDiv.innerHTML='<div class="dx-bhd"><span class="dx-dot action"></span>Commitments you didn\'t write down</div>';
+    var aBd=document.createElement("div"); aBd.className="dx-bd";
+    if(!(tmpPending.actionItems||[]).length){
+      var e=document.createElement("div"); e.className="dx-empty"; e.style.padding="14px"; e.textContent="Nothing missed \u2014 you got it all."; aBd.appendChild(e);
+    } else {
+      tmpPending.actionItems.forEach(function(a){
+        a.id=uid(); a.group=suggestGroup(a); a.list=DEFAULT_LIST; a.mode="route";
+        aBd.appendChild(actionNode(a));
+      });
+    }
+    aDiv.appendChild(aBd); buckets.appendChild(aDiv);
+    if((tmpPending.waitingOn||[]).length){
+      var wDiv=document.createElement("div"); wDiv.className="dx-bucket";
+      wDiv.innerHTML='<div class="dx-bhd"><span class="dx-dot waiting"></span>Waiting on</div>';
+      var wBd=document.createElement("div"); wBd.className="dx-bd";
+      tmpPending.waitingOn.forEach(function(w){
+        var n=waitingNode(w); if(n) wBd.appendChild(n);
+      });
+      wDiv.appendChild(wBd); buckets.appendChild(wDiv);
+    }
+    card.appendChild(buckets);
+    var commitBar=document.createElement("div"); commitBar.style.cssText="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)";
+    var hint=document.createElement("div"); hint.className="dx-hint"; hint.textContent="Route or park each item, then commit."; commitBar.appendChild(hint);
+    var commitBtn=document.createElement("button"); commitBtn.className="go small"; commitBtn.type="button"; commitBtn.textContent="Commit";
+    commitBtn.addEventListener("click",function(){
+      pending=tmpPending;
+      lastInput={ title:note.title, date:note.date, url:note.url, source:"granola", granolaId:note.id, notes:"", truth:note.truth };
+      commitMeeting();
+      card.style.opacity="0.45"; commitBtn.disabled=true; commitBtn.textContent="Committed";
+      toast(esc(note.title)+" committed");
+    });
+    commitBar.appendChild(commitBtn); card.appendChild(commitBar);
+    host.appendChild(card);
+  }
+  function suggestGroup(a){
+    var t=(a.title||"").toLowerCase();
+    if(/personal|family|home|health|gym|grocery/i.test(t)) return "Personal";
+    if(/turnkey|dave|ryan|accounting/i.test(t)) return "TurnKey";
+    if(/partner|mortgage|loan|pm|dan|production|marketing|onboard/i.test(t)) return "Partners Mortgage";
+    return "My Lists";
   }
   function archiveMeeting(){
     if(!lastInput) return;
@@ -1975,6 +2081,8 @@ var DailyOS = (function(){
     try { ddoc().onSnapshot(function(snap){ dstate=withDefaults(snap.exists?snap.data():{}); renderAll(); }, function(err){ console.warn("daily snapshot",err); renderAll(); }); }
     catch(e){ console.warn("daily subscribe",e); renderAll(); }
     var pb=$("dxPull"); if(pb) pb.addEventListener("click",pullGranola);
+    var bb=$("dxBatchBtn"); if(bb) bb.addEventListener("click",runBatchReconcile);
+    var sa=$("dxSelectAll"); if(sa) sa.addEventListener("change",function(){ document.querySelectorAll(".batch-cb").forEach(function(c){c.checked=sa.checked;}); updateBatchBtn(); });
     var bg=$("brainGo"), bq=$("brainQ");
     if(bg) bg.addEventListener("click",function(){ renderBrain(bq?bq.value:""); });
     if(bq) bq.addEventListener("keyup",function(e){ if(e.key==="Enter") renderBrain(bq.value); });
