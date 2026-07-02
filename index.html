@@ -399,6 +399,16 @@
   .wk-decitem .lt{ font-weight:600; font-size:14px; color:var(--ink); }
   .wk-decitem .cx{ font-size:12.5px; color:var(--warm); margin-top:2px; }
   .wk-decitem .mt{ font-size:11px; color:var(--warm-lt); margin-top:3px; }
+
+  /* ===== reconcile inputs + Brain ===== */
+  #dxNotes:focus,#dxUrl:focus,#dxSource:focus,#brainQ:focus{ border-color:var(--teal); }
+  .brain-row{ border:1px solid var(--line); border-left:4px solid var(--teal); border-radius:11px; padding:13px 15px; margin:10px 0; background:var(--card); }
+  .brain-row .bh{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .brain-row .bt{ font-weight:700; font-size:14px; color:var(--ink); }
+  .brain-row .bd{ font-size:11.5px; color:var(--warm-lt); }
+  .brain-row .bg{ font-size:12.5px; color:var(--warm); margin-top:6px; }
+  .brain-row .bl{ font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--teal-deep); margin-right:5px; }
+  .brain-row a{ color:var(--teal-deep); }
 </style>
 </head>
 <body>
@@ -437,10 +447,11 @@
   </header>
   <nav class="cc-nav fade" id="tabnav" role="tablist">
     <button class="tab active" data-view="weekly" role="tab">Weekly Closeout</button>
-    <button class="tab" data-view="capture" role="tab">Capture</button>
+    <button class="tab" data-view="capture" role="tab">Reconcile</button>
     <button class="tab" data-view="loops" role="tab">Open Loops <span class="cbadge cb-teal" id="cb-loops">0</span></button>
     <button class="tab" data-view="waiting" role="tab">Waiting On <span class="cbadge cb-gold" id="cb-waiting">0</span></button>
     <button class="tab" data-view="decisions" role="tab">Decisions <span class="cbadge cb-purple" id="cb-decisions">0</span></button>
+    <button class="tab" data-view="brain" role="tab">Brain</button>
     <div class="cc-navstat">Claude gathers · you decide</div>
   </nav>
 
@@ -668,17 +679,25 @@
 
   <!-- ===== DAILY EXECUTION VIEWS ===== -->
   <div id="view-capture" class="view">
-    <div class="dx-lede">Drop a meeting. <em>Capture every commitment.</em></div>
-    <div class="dx-sub">Paste or drop a summary from Granola or Grain. Claude sorts it into your action items, what you're waiting on, decisions to log, and context to hold — then you route each item to Reminders or park it for Friday.</div>
+    <div class="dx-lede">Reconcile a meeting. <em>Surface what you missed.</em></div>
+    <div class="dx-sub">Claude compares your own notes against what the meeting actually contained and surfaces the <em>delta</em> — the commitments you made but didn't write down. High-level tasks only; decisions get archived to the Brain, not dumped in front of you.</div>
     <div class="dx-card">
       <div class="dx-row2">
         <div><label class="dx-lab">Meeting</label><input type="text" id="dxTitle" placeholder="e.g. Pipeline review with Dan"></div>
         <div><label class="dx-lab">Date</label><input type="date" id="dxDate"></div>
       </div>
-      <label class="dx-lab">Summary / notes</label>
-      <div class="dx-drop" id="dxDrop"><textarea id="dxText" placeholder="Paste the Granola or Grain summary here, or drop a .txt / .md file…"></textarea></div>
+      <div id="dxGranolaBar" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)">
+        <button class="go alt small" id="dxPull" type="button">Get outstanding meetings</button>
+        <span class="dx-hint" id="dxPullMsg" style="margin-left:10px"></span>
+        <div id="dxPickList" style="margin-top:10px;display:none"></div>
+      </div>
+      <div class="dx-row2" style="margin-bottom:12px"><div><label class="dx-lab">Source</label><select id="dxSource"><option value="granola">Granola</option><option value="fieldy">Fieldy</option><option value="paste">Paste</option></select></div><div><label class="dx-lab">Meeting URL (optional)</label><input type="text" id="dxUrl" placeholder="notes.granola.ai/… or Fieldy link"></div></div>
+      <label class="dx-lab">Your notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--warm)">— what you typed during the meeting (leave blank for a Fieldy paste)</span></label>
+      <textarea id="dxNotes" placeholder="Paste the notes you typed yourself…" style="width:100%;min-height:92px;font-family:inherit;font-size:14px;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;resize:vertical;margin-bottom:12px;color:var(--ink)"></textarea>
+      <label class="dx-lab">Ground truth <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--warm)">— Granola summary / transcript, or a Fieldy conversation</span></label>
+      <div class="dx-drop" id="dxDrop"><textarea id="dxText" placeholder="Paste the Granola summary / transcript, or a Fieldy conversation…"></textarea></div>
       <div class="dx-actions" style="margin-top:12px">
-        <button class="go" id="dxExtract">Extract with Claude</button>
+        <button class="go" id="dxExtract">Reconcile</button>
         <button class="go alt small" id="dxSample">Load a sample</button>
         <button class="go alt small" id="dxClear">Clear</button>
       </div>
@@ -686,7 +705,7 @@
     </div>
     <div id="dxResults" style="display:none">
       <div class="dx-buckets">
-        <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot action"></span>Action items <span style="font-weight:400;font-size:12px;color:var(--warm)">— yours</span></div><div class="dx-bd" id="dxBAction"></div></div>
+        <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot action"></span>Commitments you didn't write down</div><div class="dx-bd" id="dxBAction"></div></div>
         <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot waiting"></span>Waiting on</div><div class="dx-bd" id="dxBWaiting"></div></div>
         <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot decision"></span>Decisions</div><div class="dx-bd" id="dxBDecision"></div></div>
         <div class="dx-bucket"><div class="dx-bhd"><span class="dx-dot fyi"></span>FYI / context</div><div class="dx-bd" id="dxBFyi"></div></div>
@@ -725,6 +744,16 @@
     </div>
   </div>
 
+  <div id="view-brain" class="view">
+    <div class="dx-lede">The Brain.</div>
+    <div class="dx-sub">Every reconciled meeting, archived append-only and searchable. Ask by person, topic, or number — "Dan", "override", "Erik comp", "5bps".</div>
+    <div class="dx-card">
+      <div class="dx-addbar one"><input type="text" id="brainQ" placeholder="Search the archive…"><button class="go small" id="brainGo">Search</button></div>
+      <div class="dx-secthd" style="margin-top:16px"><strong style="font-family:'Lora',serif;font-weight:500;font-size:17px">Archive</strong><span class="r" id="brainMeta"></span></div>
+      <div class="dx-list" id="brainList"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ===== SETTINGS MODAL ===== -->
@@ -734,6 +763,8 @@
     <div class="desc">Anthropic key is stored in your private Firestore. PIN gates this panel and the closeout itself.</div>
     <label>Anthropic API key</label>
     <input id="apiKeyInput" type="password" placeholder="sk-ant-…">
+    <label>Granola API key</label>
+    <input id="granolaKeyInput" type="password" placeholder="grn_…">
     <label>PIN (4–6 digits)</label>
     <input id="pinChangeInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="leave blank to keep">
     <label>Week label (override)</label>
@@ -800,6 +831,7 @@ async function loadSettings(){
     if(doc.exists){
       const d = doc.data();
       settings.apiKey = d.apiKey || "";
+      settings.granolaKey = d.granolaKey || "";
       settings.pin = d.pin || DEFAULT_PIN;
       settings.weekOverride = d.weekOverride || "";
     }
@@ -1471,6 +1503,7 @@ document.getElementById("printBtn").addEventListener("click", ()=> window.print(
 const settingsModal = document.getElementById("settingsModal");
 document.getElementById("gearBtn").addEventListener("click", ()=>{
   document.getElementById("apiKeyInput").value = settings.apiKey || "";
+  document.getElementById("granolaKeyInput").value = settings.granolaKey || "";
   document.getElementById("pinChangeInput").value = "";
   document.getElementById("weekOverride").value = settings.weekOverride || "";
   settingsModal.classList.add("show");
@@ -1478,6 +1511,7 @@ document.getElementById("gearBtn").addEventListener("click", ()=>{
 document.getElementById("settingsCancel").addEventListener("click", ()=> settingsModal.classList.remove("show"));
 document.getElementById("settingsSave").addEventListener("click", async ()=>{
   settings.apiKey = document.getElementById("apiKeyInput").value.trim();
+  settings.granolaKey = document.getElementById("granolaKeyInput").value.trim();
   const newPin = document.getElementById("pinChangeInput").value.trim();
   if(newPin){
     if(!/^\d{4,6}$/.test(newPin)){ alert("PIN must be 4–6 digits."); return; }
@@ -1536,6 +1570,7 @@ var DailyOS = (function(){
 
   var dstate = { parked:[], waiting:[], decisions:[], fyi:[] };
   var pending = null, routeCtx = null, routeQueue = [], booted = false;
+  var lastInput=null, corpus=[], pickedGranolaId="";
 
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -1569,17 +1604,7 @@ var DailyOS = (function(){
   }
 
   /* ---- extraction ---- */
-  var EXTRACT_PROMPT =
-    "You are an executive chief of staff extracting structured commitments from a meeting summary. " +
-    "Respond with ONLY valid JSON — no prose, no markdown, no code fences. Schema exactly:\n" +
-    '{"actionItems":[{"title":"","suggestedDate":"","suggestedGroup":""}],' +
-    '"waitingOn":[{"who":"","what":""}],' +
-    '"decisions":[{"decision":"","context":""}],' +
-    '"fyi":[{"note":""}]}\n' +
-    "actionItems are commitments the executive (first person) owns. waitingOn are things OTHER people owe back to the executive. " +
-    "decisions are choices that were settled and should be logged. fyi is context worth keeping but not actionable. " +
-    'suggestedGroup must be one of: "My Lists","TurnKey","Partners Mortgage","Personal". ' +
-    'suggestedDate is ISO YYYY-MM-DD when stated or clearly implied, else "". Keep titles short and verb-first.';
+  var EXTRACT_PROMPT = 'You reconcile meeting records for Leif Boyd, President of Partners Mortgage. You receive (A) the notes Leif typed himself and (B) the ground-truth summary or transcript. Compare them and return ONLY valid JSON, no prose, no markdown, no code fences. Shape:\n{"actionItems":[{"title":"imperative task Leif committed to but did NOT write in A","suggestedDate":"","suggestedGroup":"","context":"short clause of why or for whom"}],"waitingOn":[{"who":"person","what":"what they owe Leif"}],"decisions":[{"decision":"a concrete decision, number, or policy worth keeping permanently","context":""}],"fyi":[]}\nRules: actionItems holds ONLY commitments Leif made that are MISSING from A (the delta); never repeat what is already in A. Commitments by other people go in waitingOn. If A is empty, treat every Leif commitment in B as missing. Keep the list tight and high-level, not exhaustive. decisions are comp splits, routing rules, targets, or policies worth permanent memory. Keep tasks imperative and under 12 words. suggestedGroup is one of: My Lists, TurnKey, Partners Mortgage, Personal. Return valid JSON only.';
 
   function normalize(o){
     o=o||{};
@@ -1587,7 +1612,7 @@ var DailyOS = (function(){
     return {
       actionItems:(Array.isArray(o.actionItems)?o.actionItems:[]).map(function(a){
         var g=groups.indexOf(a.suggestedGroup)>-1?a.suggestedGroup:"My Lists";
-        return { id:uid(), title:a.title||"", date:a.suggestedDate||"", group:g, list:DEFAULT_LIST, mode:"route" }; }),
+        return { id:uid(), title:a.title||"", date:a.suggestedDate||"", context:a.context||"", group:g, list:DEFAULT_LIST, mode:"route" }; }),
       waitingOn:(Array.isArray(o.waitingOn)?o.waitingOn:[]).map(function(w){ return { id:uid(), who:w.who||"", what:w.what||"", keep:true }; }),
       decisions:(Array.isArray(o.decisions)?o.decisions:[]).map(function(d){ return { id:uid(), decision:d.decision||"", context:d.context||"", keep:true }; }),
       fyi:(Array.isArray(o.fyi)?o.fyi:[]).map(function(f){ return { id:uid(), note:(f&&f.note)||f||"", keep:false }; })
@@ -1616,11 +1641,11 @@ var DailyOS = (function(){
     });
     return normalize(out);
   }
-  function callExtract(text){
+  function callExtract(notes, truth){
     return fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{ "x-api-key":settings.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true", "Content-Type":"application/json" },
-      body:JSON.stringify({ model:MODEL, max_tokens:1500, messages:[{ role:"user", content:EXTRACT_PROMPT+"\n\n---\nMEETING SUMMARY:\n"+text }] })
+      body:JSON.stringify({ model:MODEL, max_tokens:2000, messages:[{ role:"user", content:EXTRACT_PROMPT+"\n\nA) LEIF NOTES:\n"+(notes||"(none)")+"\n\nB) GROUND TRUTH:\n"+truth }] })
     }).then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error("Claude "+r.status+": "+t.slice(0,200)); }); return r.json(); })
       .then(function(d){ var out=(d.content||[]).filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join("\n"); return parseExtraction(out); });
   }
@@ -1629,14 +1654,15 @@ var DailyOS = (function(){
   function progress(on,main,sub){ var p=$("dxProgress"); if(on){ p.classList.add("show"); $("dxPMain").textContent=main||"Reading the meeting…"; $("dxPSub").textContent=sub||""; } else p.classList.remove("show"); }
 
   function runExtract(){
-    var text=$("dxText").value.trim();
-    if(!text){ toast("Paste a meeting summary first"); return; }
+    var truth=$("dxText").value.trim(), notes=$("dxNotes")?$("dxNotes").value.trim():"";
+    if(!truth){ toast("Paste the meeting summary / transcript first"); return; }
+    lastInput={ title:($("dxTitle").value||"").trim(), date:$("dxDate").value||todayISO(), url:($("dxUrl")?$("dxUrl").value.trim():""), source:($("dxSource")?$("dxSource").value:"paste"), granolaId:(pickedGranolaId||""), notes:notes, truth:truth };
     $("dxExtract").disabled=true;
-    var done=function(res,via){ pending=res; progress(false); $("dxExtract").disabled=false; renderResults(); $("dxResults").style.display="block"; toast(via||"Extracted"); $("dxResults").scrollIntoView({behavior:"smooth",block:"start"}); };
-    var fallback=function(){ progress(true,"Reading on-device…","Splitting by section headers"); setTimeout(function(){ try{ done(heuristicExtract(text),"Parsed on-device"); }catch(e){ progress(false); $("dxExtract").disabled=false; window.__fatal("Extraction failed",e.stack); } },400); };
+    var done=function(res,via){ pending=res; progress(false); $("dxExtract").disabled=false; renderResults(); $("dxResults").style.display="block"; toast(via||"Reconciled"); $("dxResults").scrollIntoView({behavior:"smooth",block:"start"}); };
+    var fallback=function(){ progress(true,"Reading on-device…","Splitting by section headers"); setTimeout(function(){ try{ done(heuristicExtract(truth),"Parsed on-device"); }catch(e){ progress(false); $("dxExtract").disabled=false; window.__fatal("Reconcile failed",e.stack); } },400); };
     if(!settings.apiKey){ fallback(); return; }
-    progress(true,"Reading the meeting…","Sorting commitments into buckets");
-    callExtract(text).then(function(res){ done(res); }).catch(function(e){ console.warn("extract",e); fallback(); });
+    progress(true,"Reconciling your notes against the meeting…","Surfacing what you did not write down");
+    callExtract(notes,truth).then(function(res){ done(res); }).catch(function(e){ console.warn("reconcile",e); fallback(); });
   }
 
   function renderResults(){
@@ -1655,6 +1681,7 @@ var DailyOS = (function(){
     var n=document.createElement("div"); n.className="dx-item";
     var t=document.createElement("input"); t.type="text"; t.className="ti"; t.value=a.title; t.style.width="100%";
     t.addEventListener("input",function(){ a.title=t.value; }); n.appendChild(t);
+    if(a.context){ var cx=document.createElement("div"); cx.className="dx-hint"; cx.style.margin="4px 0 2px"; cx.textContent=a.context; n.appendChild(cx); }
     var meta=document.createElement("div"); meta.className="dx-meta";
     var dw=document.createElement("div"); var d=document.createElement("input"); d.type="date"; d.value=a.date||""; d.addEventListener("input",function(){ a.date=d.value; }); dw.appendChild(d); meta.appendChild(dw);
     var lw=document.createElement("div"); var sel=document.createElement("select"); buildListSelect(sel); sel.value=a.list; if(sel.value!==a.list) a.list=sel.value; sel.addEventListener("change",function(){ a.list=sel.value; }); lw.appendChild(sel); meta.appendChild(lw);
@@ -1707,10 +1734,11 @@ var DailyOS = (function(){
     pending.decisions.forEach(function(d){ if(d.keep!==false&&d.decision.trim()) dstate.decisions.push({ id:uid(), decision:d.decision.trim(), context:(d.context||"").trim(), source:mtg, date:when }); });
     pending.fyi.forEach(function(f){ if(f.keep===true&&f.note.trim()) dstate.parked.push({ id:uid(), title:f.note.trim(), date:"", list:"", source:mtg, captured:when, status:"parked", fyi:true }); });
     dsave();
+    archiveMeeting();
     if(routedNow.length){ routeQueue=routedNow.slice(); toast("Committed — "+parked+" parked"); processQueue(); }
     else { toast("Committed — "+parked+" parked"); resetCapture(); }
   }
-  function resetCapture(){ pending=null; $("dxResults").style.display="none"; $("dxText").value=""; $("dxTitle").value=""; }
+  function resetCapture(){ pending=null; lastInput=null; pickedGranolaId=""; $("dxResults").style.display="none"; $("dxText").value=""; if($("dxNotes"))$("dxNotes").value=""; if($("dxUrl"))$("dxUrl").value=""; $("dxTitle").value=""; }
 
   /* ---- route to Reminders ---- */
   function openRoute(item, after){ routeCtx={item:item,after:after}; $("rTitle").value=item.title||""; $("rDate").value=item.date||""; buildListSelect($("rList")); if(item.list) $("rList").value=item.list; $("routeModal").classList.add("show"); setTimeout(function(){ $("rTitle").focus(); },50); }
@@ -1844,6 +1872,91 @@ var DailyOS = (function(){
     "Decisions\n- Moving forward with ElevenLabs V2 voice engine for the digital twin\n- Keeping Lose It! rather than rebuilding the food library\n\n" +
     "Notes\n- Considering a Granola MCP pull as a v2 instead of paste";
 
+  function pullGranola(){
+    var key=(settings.granolaKey||"").trim(), msg=$("dxPullMsg"), btn=$("dxPull");
+    if(!key){ if(msg) msg.textContent="Add your Granola key in Settings first."; return; }
+    if(btn) btn.disabled=true; if(msg) msg.textContent="Pulling from Granola\u2026";
+    var since=new Date(Date.now()-14*24*3600*1000).toISOString();
+    fetch("https://public-api.granola.ai/v1/notes?created_after="+encodeURIComponent(since),{ headers:{ "Authorization":"Bearer "+key } })
+      .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(r.status+" "+t.slice(0,140)); }); return r.json(); })
+      .then(function(d){
+        if(btn) btn.disabled=false;
+        var notes=(d&&d.notes)||[]; var seen={}; corpus.forEach(function(m){ if(m.granola_id) seen[m.granola_id]=1; });
+        var open=notes.filter(function(n){ return !seen[n.id]; });
+        if(msg) msg.textContent=open.length+" ready \u00b7 "+(notes.length-open.length)+" already reconciled";
+        renderPickList(open);
+      })
+      .catch(function(e){
+        if(btn) btn.disabled=false; console.warn("granola pull",e);
+        if(msg) msg.textContent="Couldn't reach Granola from the browser ("+(e.message||"error")+"). It may block direct calls \u2014 paste the summary below instead.";
+      });
+  }
+  function renderPickList(notes){
+    var host=$("dxPickList"); if(!host) return;
+    host.innerHTML=""; host.style.display=notes.length?"block":"none";
+    notes.forEach(function(n){
+      var b=document.createElement("button"); b.className="go alt small"; b.type="button";
+      b.style.cssText="display:block;width:100%;text-align:left;margin:5px 0";
+      var dt=(n.created_at||n.created||n.date||"").slice(0,10);
+      b.textContent=(n.title||"Untitled")+(dt?"  \u00b7  "+fmtDate(dt):"");
+      b.addEventListener("click",function(){ pickGranola(n.id); });
+      host.appendChild(b);
+    });
+  }
+  function pickGranola(id){
+    var key=(settings.granolaKey||"").trim(), msg=$("dxPullMsg");
+    if(msg) msg.textContent="Loading meeting\u2026";
+    fetch("https://public-api.granola.ai/v1/notes/"+encodeURIComponent(id)+"?include=transcript",{ headers:{ "Authorization":"Bearer "+key } })
+      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(n){
+        var tx=Array.isArray(n.transcript)?n.transcript.map(function(u){return (u.text||"");}).join(" "):"";
+        $("dxText").value=(n.summary||"")+(tx?"\n\nTRANSCRIPT:\n"+tx:"");
+        $("dxTitle").value=n.title||"";
+        if($("dxDate")) $("dxDate").value=(n.created_at||n.created||n.date||"").slice(0,10);
+        if($("dxUrl")) $("dxUrl").value=n.url||n.share_url||"";
+        if($("dxSource")) $("dxSource").value="granola";
+        pickedGranolaId=id;
+        if(msg) msg.textContent="Loaded \u2014 add your own notes above for the sharper diff, then Reconcile.";
+        $("dxText").scrollIntoView({behavior:"smooth",block:"center"});
+      })
+      .catch(function(e){ if(msg) msg.textContent="Couldn't load that meeting ("+(e.message||"error")+")."; });
+  }
+  function archiveMeeting(){
+    if(!lastInput) return;
+    var id="m_"+uid();
+    var rec={
+      id:id, source:lastInput.source||"paste", title:lastInput.title||"Untitled meeting", date:lastInput.date||todayISO(),
+      url:lastInput.url||"", granola_id:lastInput.granolaId||"", my_notes:lastInput.notes||"", summary:lastInput.truth||"",
+      missed:(pending.actionItems||[]).map(function(a){ return { task:a.title, context:a.context||"", list:a.list||"", date:a.date||"" }; }),
+      waiting:(pending.waitingOn||[]).map(function(w){ return { who:w.who, item:w.what }; }),
+      decisions:(pending.decisions||[]).map(function(d){ return d.decision+(d.context?" \u2014 "+d.context:""); }),
+      ingested_at:new Date().toISOString()
+    };
+    try{ db.collection("meetings").doc(id).set(rec); toast("Archived to the Brain"); }catch(e){ console.warn("archive",e); }
+  }
+  function renderBrain(q){
+    var host=$("brainList"); if(!host) return;
+    q=(q||"").trim().toLowerCase();
+    var rows=corpus.slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
+    if(q){ rows=rows.filter(function(m){
+      var hay=[m.title,m.date,m.source,m.my_notes,m.summary,(m.decisions||[]).join(" "),(m.missed||[]).map(function(x){return x.task+" "+(x.context||"");}).join(" "),(m.waiting||[]).map(function(x){return (x.who||"")+" "+(x.item||"");}).join(" ")].join(" ").toLowerCase();
+      return hay.indexOf(q)>-1;
+    }); }
+    var meta=$("brainMeta"); if(meta) meta.textContent=corpus.length+" meeting"+(corpus.length===1?"":"s")+" archived"+(q?" \u00b7 "+rows.length+" match":"");
+    host.innerHTML="";
+    if(!corpus.length){ var e=document.createElement("div"); e.className="dx-empty"; e.style.padding="24px"; e.textContent="Nothing archived yet. Reconcile a meeting and it lands here, searchable forever."; host.appendChild(e); return; }
+    if(!rows.length){ var e2=document.createElement("div"); e2.className="dx-empty"; e2.style.padding="24px"; e2.textContent="No meetings match that search."; host.appendChild(e2); return; }
+    rows.slice(0,40).forEach(function(m){
+      var row=document.createElement("div"); row.className="brain-row";
+      var head='<div class="bh"><span class="bt">'+esc(m.title||"Untitled")+'</span><span class="bd">'+esc(fmtDate(m.date))+' \u00b7 '+esc(m.source||"")+'</span></div>';
+      var body="";
+      if((m.missed||[]).length) body+='<div class="bg"><span class="bl">Tasks</span> '+m.missed.map(function(x){return esc(x.task);}).join(" \u00b7 ")+'</div>';
+      if((m.waiting||[]).length) body+='<div class="bg"><span class="bl">Waiting</span> '+m.waiting.map(function(x){return esc((x.who||"")+": "+(x.item||""));}).join(" \u00b7 ")+'</div>';
+      if((m.decisions||[]).length) body+='<div class="bg"><span class="bl">Decisions</span> '+m.decisions.map(function(x){return esc(x);}).join(" \u00b7 ")+'</div>';
+      if(m.url) body+='<div class="bg"><a href="'+esc(m.url)+'" target="_blank" rel="noopener">open source</a></div>';
+      row.innerHTML=head+body; host.appendChild(row);
+    });
+  }
   function boot(){
     if(booted) return Promise.resolve();
     booted=true;
@@ -1866,6 +1979,12 @@ var DailyOS = (function(){
     var pull=$("pullLoopsBtn"); if(pull) pull.addEventListener("click",pullLoops);
     try { ddoc().onSnapshot(function(snap){ dstate=withDefaults(snap.exists?snap.data():{}); renderAll(); }, function(err){ console.warn("daily snapshot",err); renderAll(); }); }
     catch(e){ console.warn("daily subscribe",e); renderAll(); }
+    var pb=$("dxPull"); if(pb) pb.addEventListener("click",pullGranola);
+    var bg=$("brainGo"), bq=$("brainQ");
+    if(bg) bg.addEventListener("click",function(){ renderBrain(bq?bq.value:""); });
+    if(bq) bq.addEventListener("keyup",function(e){ if(e.key==="Enter") renderBrain(bq.value); });
+    try { db.collection("meetings").onSnapshot(function(snap){ corpus=snap.docs.map(function(d){return d.data();}); renderBrain(bq?bq.value:""); }, function(err){ console.warn("brain snapshot",err); }); }
+    catch(e){ console.warn("brain subscribe",e); }
     return Promise.resolve();
   }
 
