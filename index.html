@@ -422,6 +422,8 @@
   .batch-row:last-child{ border-bottom:0; }
   .batch-row:hover{ background:rgba(0,129,141,.04); border-radius:7px; }
   .batch-cb{ width:16px; height:16px; accent-color:var(--teal); cursor:pointer; flex:0 0 auto; }
+  .batch-x{ flex:0 0 auto; width:26px; height:26px; border:0; background:transparent; color:var(--warm-lt); font-size:14px; cursor:pointer; border-radius:6px; line-height:1; }
+  .batch-x:hover{ background:rgba(251,80,88,.12); color:var(--red); }
   .batch-result-card{ border-left:4px solid var(--teal); }
   .batch-card-hd{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
   .batch-card-title{ font-family:'Lora',serif; font-weight:500; font-size:17px; color:var(--ink); }
@@ -707,6 +709,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <label style="font-size:12px;color:var(--warm);cursor:pointer"><input type="checkbox" id="dxSelectAll" style="margin-right:4px">Select all</label>
+          <button class="go alt small" id="dxDismissBtn" disabled style="display:none">Dismiss selected</button>
           <button class="go" id="dxBatchBtn" disabled style="min-width:160px">Reconcile selected</button>
         </div>
       </div>
@@ -1931,21 +1934,40 @@ var DailyOS = (function(){
     var host=$("dxPickList"); if(!host) return;
     host.innerHTML=""; host.style.display=notes.length?"block":"none";
     notes.forEach(function(n){
-      var row=document.createElement("label"); row.className="batch-row";
+      var row=document.createElement("div"); row.className="batch-row";
+      var lab=document.createElement("label"); lab.style.cssText="display:flex;align-items:center;gap:11px;flex:1;cursor:pointer;min-width:0";
       var cb=document.createElement("input"); cb.type="checkbox"; cb.value=n.id; cb.className="batch-cb";
-      cb.setAttribute("data-title",n.title||"Untitled"); cb.setAttribute("data-date",(n.created_at||n.created||n.date||"").slice(0,10));
-      cb.addEventListener("change",updateBatchBtn);
       var dt=(n.created_at||n.created||n.date||"").slice(0,10);
-      var span=document.createElement("span"); span.textContent=(n.title||"Untitled")+(dt?"  \u00b7  "+fmtDate(dt):"");
-      row.appendChild(cb); row.appendChild(span); host.appendChild(row);
+      cb.setAttribute("data-title",n.title||"Untitled"); cb.setAttribute("data-date",dt);
+      cb.addEventListener("change",updateBatchBtn);
+      var span=document.createElement("span"); span.style.cssText="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"; span.textContent=(n.title||"Untitled")+(dt?"  \u00b7  "+fmtDate(dt):"");
+      lab.appendChild(cb); lab.appendChild(span);
+      var x=document.createElement("button"); x.type="button"; x.className="batch-x"; x.title="Dismiss — remove from list without reconciling"; x.textContent="\u2715";
+      x.addEventListener("click",function(e){ e.preventDefault(); e.stopPropagation(); dismissMeeting(n.id, n.title||"Untitled", dt); row.remove(); if(!host.children.length) host.style.display="none"; updateBatchBtn(); });
+      row.appendChild(lab); row.appendChild(x); host.appendChild(row);
     });
     updateBatchBtn();
   }
+  function dismissMeeting(gid, title, date){
+    var id="m_"+uid();
+    var rec={ id:id, source:"granola", title:title||"Untitled meeting", date:date||todayISO(),
+      url:"", granola_id:gid||"", my_notes:"", summary:"", missed:[], waiting:[], decisions:[],
+      dismissed:true, ingested_at:new Date().toISOString() };
+    try{ db.collection("meetings").doc(id).set(rec); toast("Dismissed \u2014 won't show again"); }catch(e){ console.warn("dismiss",e); }
+  }
+  function dismissSelected(){
+    var cbs=Array.from(document.querySelectorAll(".batch-cb:checked"));
+    if(!cbs.length){ toast("Check meetings to dismiss"); return; }
+    cbs.forEach(function(c){ dismissMeeting(c.value, c.getAttribute("data-title"), c.getAttribute("data-date")); var row=c.closest(".batch-row"); if(row) row.remove(); });
+    var host=$("dxPickList"); if(host&&!host.children.length) host.style.display="none";
+    var sa=$("dxSelectAll"); if(sa) sa.checked=false;
+    updateBatchBtn();
+    toast(cbs.length+" dismissed");
+  }
   function updateBatchBtn(){
     var checked=document.querySelectorAll(".batch-cb:checked").length;
-    var btn=$("dxBatchBtn"); if(!btn) return;
-    btn.disabled=checked===0;
-    btn.textContent=checked?"Reconcile "+checked+" meeting"+(checked===1?"":"s"):"Reconcile selected";
+    var btn=$("dxBatchBtn"); if(btn){ btn.disabled=checked===0; btn.textContent=checked?"Reconcile "+checked+" meeting"+(checked===1?"":"s"):"Reconcile selected"; }
+    var dbtn=$("dxDismissBtn"); if(dbtn){ dbtn.disabled=checked===0; dbtn.style.display=checked?"inline-flex":"none"; }
   }
   function fetchGranolaNote(id){
     return fetch(GRANOLA_GW+"/v1/notes/"+encodeURIComponent(id)+"?include=transcript")
@@ -2015,7 +2037,7 @@ var DailyOS = (function(){
       wDiv.innerHTML='<div class="dx-bhd"><span class="dx-dot waiting"></span>Waiting on</div>';
       var wBd=document.createElement("div"); wBd.className="dx-bd";
       tmpPending.waitingOn.forEach(function(w){
-        var n=waitingNode(w); if(n) wBd.appendChild(n);
+        var n=simpleNode(w,"waiting"); if(n) wBd.appendChild(n);
       });
       wDiv.appendChild(wBd); buckets.appendChild(wDiv);
     }
@@ -2056,14 +2078,15 @@ var DailyOS = (function(){
   function renderBrain(q){
     var host=$("brainList"); if(!host) return;
     q=(q||"").trim().toLowerCase();
-    var rows=corpus.slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
+    var real=corpus.filter(function(m){ return !m.dismissed; });
+    var rows=real.slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
     if(q){ rows=rows.filter(function(m){
       var hay=[m.title,m.date,m.source,m.my_notes,m.summary,(m.decisions||[]).join(" "),(m.missed||[]).map(function(x){return x.task+" "+(x.context||"");}).join(" "),(m.waiting||[]).map(function(x){return (x.who||"")+" "+(x.item||"");}).join(" ")].join(" ").toLowerCase();
       return hay.indexOf(q)>-1;
     }); }
-    var meta=$("brainMeta"); if(meta) meta.textContent=corpus.length+" meeting"+(corpus.length===1?"":"s")+" archived"+(q?" \u00b7 "+rows.length+" match":"");
+    var meta=$("brainMeta"); if(meta) meta.textContent=real.length+" meeting"+(real.length===1?"":"s")+" archived"+(q?" \u00b7 "+rows.length+" match":"");
     host.innerHTML="";
-    if(!corpus.length){ var e=document.createElement("div"); e.className="dx-empty"; e.style.padding="24px"; e.textContent="Nothing archived yet. Reconcile a meeting and it lands here, searchable forever."; host.appendChild(e); return; }
+    if(!real.length){ var e=document.createElement("div"); e.className="dx-empty"; e.style.padding="24px"; e.textContent="Nothing archived yet. Reconcile a meeting and it lands here, searchable forever."; host.appendChild(e); return; }
     if(!rows.length){ var e2=document.createElement("div"); e2.className="dx-empty"; e2.style.padding="24px"; e2.textContent="No meetings match that search."; host.appendChild(e2); return; }
     rows.slice(0,40).forEach(function(m){
       var row=document.createElement("div"); row.className="brain-row";
@@ -2102,6 +2125,7 @@ var DailyOS = (function(){
     catch(e){ console.warn("daily subscribe",e); renderAll(); }
     var pb=$("dxPull"); if(pb) pb.addEventListener("click",pullGranola);
     var bb=$("dxBatchBtn"); if(bb) bb.addEventListener("click",runBatchReconcile);
+    var db2=$("dxDismissBtn"); if(db2) db2.addEventListener("click",dismissSelected);
     var sa=$("dxSelectAll"); if(sa) sa.addEventListener("change",function(){ document.querySelectorAll(".batch-cb").forEach(function(c){c.checked=sa.checked;}); updateBatchBtn(); });
     var bg=$("brainGo"), bq=$("brainQ");
     if(bg) bg.addEventListener("click",function(){ renderBrain(bq?bq.value:""); });
