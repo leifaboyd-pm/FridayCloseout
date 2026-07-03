@@ -946,7 +946,7 @@
     <input id="pinChangeInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="leave blank to keep">
     <label>Week label (override)</label>
     <input id="weekOverride" type="text" placeholder="e.g. May 25 → June 1 (auto if blank)">
-    <button type="button" class="go alt small" style="margin-top:12px" onclick="try{localStorage.removeItem('fc_unlocked')}catch(e){}; location.reload();">Lock this device (require PIN again)</button>
+    <button type="button" class="go alt small" style="margin-top:12px" onclick="try{localStorage.removeItem('fc_unlocked')}catch(e){}; try{document.cookie='fc_unlocked=; max-age=0; path=/';}catch(e){}; location.reload();">Lock this device (require PIN again)</button>
     <div class="row">
       <button class="go alt" id="settingsCancel">Cancel</button>
       <button class="go" id="settingsSave">Save</button>
@@ -1041,6 +1041,7 @@ document.getElementById("pinInput").addEventListener("input", async (e)=>{
     await loadSettings();
     if(v === settings.pin || v === DEFAULT_PIN){
       try { localStorage.setItem("fc_unlocked","1"); } catch(_){}
+      try { document.cookie="fc_unlocked=1; max-age=315360000; path=/; SameSite=Lax"; } catch(_){}
       unlock();
     } else if(v.length >= settings.pin.length){
       document.getElementById("lockErr").textContent = "Try again";
@@ -2453,7 +2454,9 @@ var DailyOS = (function(){
 // Auto-unlock if session is still valid
 (function bootLock(){
   try {
-    if(localStorage.getItem("fc_unlocked") === "1"){ unlock(); return; }
+    var _lsOK=false; try{ _lsOK=(localStorage.getItem("fc_unlocked")==="1"); }catch(_){}
+    var _ckOK=/(?:^|;\s*)fc_unlocked=1(?:;|$)/.test(document.cookie||"");
+    if(_lsOK || _ckOK){ unlock(); return; }
   } catch(_){}
   showLock();
 })();
