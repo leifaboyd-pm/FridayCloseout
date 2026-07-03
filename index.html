@@ -1813,17 +1813,24 @@ var DailyOS = (function(){
   }
 
   /* ---- weekly list -> tasks ---- */
+  function taskLines(ul){
+    var lis=Array.from(ul.querySelectorAll("li")).map(function(li){ return li.textContent.trim(); }).filter(Boolean);
+    if(lis.length) return lis;
+    var raw=(ul.innerText||ul.textContent||"");
+    return raw.split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+  }
+  function tpEsc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
   function buildTaskPanel(key){
     var panel=document.querySelector('[data-taskpanel="'+key+'"]'); if(!panel) return;
     var ul=document.querySelector('[data-cell="'+key+'"]'); if(!ul) return;
     if(panel.style.display==="block"){ panel.style.display="none"; panel.innerHTML=""; return; }
-    var lis=Array.from(ul.querySelectorAll("li")).filter(function(li){ return li.textContent.trim(); });
+    var lines=taskLines(ul);
     panel.innerHTML=""; panel.style.display="block";
-    if(!lis.length){ panel.innerHTML='<div class="dx-hint" style="padding:10px 2px">Nothing here yet \u2014 run a closeout to populate this list.</div>'; return; }
-    lis.forEach(function(li,idx){
-      var done=li.textContent.trim().indexOf("\u2713")===0;
+    if(!lines.length){ panel.innerHTML='<div class="dx-hint" style="padding:10px 2px">Nothing here yet \u2014 run a closeout to populate this list.</div>'; return; }
+    lines.forEach(function(line,idx){
+      var done=line.indexOf("\u2713")===0;
       var row=document.createElement("div"); row.className="tp-row"+(done?" tp-committed":""); row.setAttribute("data-idx",idx); row.setAttribute("data-mode","");
-      var txt=document.createElement("span"); txt.className="tp-txt"; txt.textContent=li.textContent.trim();
+      var txt=document.createElement("span"); txt.className="tp-txt"; txt.textContent=line;
       var rBtn=document.createElement("button"); rBtn.type="button"; rBtn.className="tp-b route"; rBtn.textContent="Route";
       var dBtn=document.createElement("button"); dBtn.type="button"; dBtn.className="tp-b done"; dBtn.textContent="Done";
       rBtn.addEventListener("click",function(){ var on=row.getAttribute("data-mode")==="route"; row.setAttribute("data-mode",on?"":"route"); rBtn.classList.toggle("on",!on); dBtn.classList.remove("on"); updateTaskSend(key); });
@@ -1844,14 +1851,14 @@ var DailyOS = (function(){
   function sendTaskPanel(key){
     var panel=document.querySelector('[data-taskpanel="'+key+'"]'); if(!panel) return;
     var ul=document.querySelector('[data-cell="'+key+'"]'); if(!ul) return;
-    var lis=Array.from(ul.querySelectorAll("li")).filter(function(li){ return li.textContent.trim(); });
-    var routes=[], doneCount=0;
+    var lines=taskLines(ul);
+    var routes=[], doneCount=0, changed=false;
     Array.from(panel.querySelectorAll(".tp-row")).forEach(function(row){
-      var mode=row.getAttribute("data-mode"), idx=parseInt(row.getAttribute("data-idx"),10), li=lis[idx];
+      var mode=row.getAttribute("data-mode"), idx=parseInt(row.getAttribute("data-idx"),10);
       if(mode==="route"){ routes.push({ title:row.querySelector(".tp-txt").textContent.trim(), date:"", list:DEFAULT_LIST }); }
-      else if(mode==="done" && li){ if(li.textContent.trim().indexOf("\u2713")!==0){ li.textContent="\u2713 "+li.textContent.trim(); } doneCount++; }
+      else if(mode==="done" && lines[idx]!=null){ if(lines[idx].indexOf("\u2713")!==0){ lines[idx]="\u2713 "+lines[idx]; changed=true; } doneCount++; }
     });
-    if(doneCount) scheduleSave();
+    if(changed){ ul.innerHTML=lines.map(function(s){ return "<li>"+tpEsc(s)+"</li>"; }).join(""); scheduleSave(); }
     var parts=[]; if(routes.length) parts.push(routes.length+" to route"); if(doneCount) parts.push(doneCount+" marked done");
     toast(parts.join(" \u00b7 ")||"Nothing chosen");
     if(routes.length){ routeQueue=(routeQueue||[]).concat(routes); if(!routeCtx) processQueue(); }
