@@ -2046,14 +2046,38 @@ var DailyOS = (function(){
     var hint=document.createElement("div"); hint.className="dx-hint"; hint.textContent="Route or park each item, then commit."; commitBar.appendChild(hint);
     var commitBtn=document.createElement("button"); commitBtn.className="go small"; commitBtn.type="button"; commitBtn.textContent="Commit";
     commitBtn.addEventListener("click",function(){
-      pending=tmpPending;
-      lastInput={ title:note.title, date:note.date, url:note.url, source:"granola", granolaId:note.id, notes:"", truth:note.truth };
-      commitMeeting();
-      card.style.opacity="0.45"; commitBtn.disabled=true; commitBtn.textContent="Committed";
-      toast(esc(note.title)+" committed");
+      commitCard(note, tmpPending, function(parked){
+        card.style.opacity="0.45"; commitBtn.disabled=true; commitBtn.textContent="Committed";
+      });
     });
     commitBar.appendChild(commitBtn); card.appendChild(commitBar);
     host.appendChild(card);
+  }
+  function commitCard(note, res, doneCb){
+    if(!res){ toast("Nothing to commit"); return; }
+    var mtg=note.title||"Untitled meeting", when=note.date||todayISO();
+    var routedNow=[], parked=0;
+    (res.actionItems||[]).forEach(function(a){
+      if(!a.title||!a.title.trim()) return;
+      if(a.mode==="park"){ dstate.parked.push({ id:uid(), title:a.title.trim(), date:a.date||"", list:a.list||DEFAULT_LIST, source:mtg, captured:when, status:"parked" }); parked++; }
+      else routedNow.push({title:a.title.trim(),date:a.date||"",list:a.list||DEFAULT_LIST});
+    });
+    (res.waitingOn||[]).forEach(function(w){ if(w.keep!==false&&((w.who||"").trim()||(w.what||"").trim())) dstate.waiting.push({ id:uid(), who:(w.who||"").trim(), what:(w.what||"").trim(), source:mtg, since:when, status:"open" }); });
+    (res.decisions||[]).forEach(function(d){ if(d.keep!==false&&(d.decision||"").trim()) dstate.decisions.push({ id:uid(), decision:d.decision.trim(), context:(d.context||"").trim(), source:mtg, date:when }); });
+    (res.fyi||[]).forEach(function(f){ if(f.keep===true&&(f.note||"").trim()) dstate.parked.push({ id:uid(), title:f.note.trim(), date:"", list:"", source:mtg, captured:when, status:"parked", fyi:true }); });
+    dsave();
+    // archive this card's meeting to the Brain
+    var aid="m_"+uid();
+    var rec={ id:aid, source:"granola", title:mtg, date:when, url:note.url||"", granola_id:note.id||"",
+      my_notes:"", summary:note.truth||"",
+      missed:(res.actionItems||[]).map(function(a){ return { task:a.title, context:a.context||"", list:a.list||"", date:a.date||"" }; }),
+      waiting:(res.waitingOn||[]).map(function(w){ return { who:w.who, item:w.what }; }),
+      decisions:(res.decisions||[]).map(function(d){ return d.decision+(d.context?" \u2014 "+d.context:""); }),
+      ingested_at:new Date().toISOString() };
+    try{ db.collection("meetings").doc(aid).set(rec); }catch(e){ console.warn("archive",e); }
+    toast(mtg+" committed \u2014 "+parked+" parked");
+    if(doneCb) doneCb(parked);
+    if(routedNow.length){ routeQueue=(routeQueue||[]).concat(routedNow); if(!routeCtx) processQueue(); }
   }
   function suggestGroup(a){
     var t=(a.title||"").toLowerCase();
