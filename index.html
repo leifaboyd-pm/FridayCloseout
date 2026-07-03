@@ -422,6 +422,7 @@
   .tp-row:last-of-type{ border-bottom:0; }
   .tp-txt{ flex:1; font-size:13px; line-height:1.45; color:var(--ink); min-width:0; }
   .tp-committed .tp-txt{ color:var(--warm-lt); text-decoration:line-through; }
+  .tp-routed .tp-txt{ color:var(--teal); }
   .tp-b{ flex:0 0 auto; font-size:11.5px; font-weight:600; padding:5px 12px; border-radius:99px; border:1px solid var(--line); background:#fff; color:var(--warm); cursor:pointer; }
   .tp-b.route:hover{ border-color:var(--teal); color:var(--teal); }
   .tp-b.route.on{ background:var(--teal); border-color:var(--teal); color:#fff; }
@@ -1829,9 +1830,10 @@ var DailyOS = (function(){
     if(!lines.length){ panel.innerHTML='<div class="dx-hint" style="padding:10px 2px">Nothing here yet \u2014 run a closeout to populate this list.</div>'; return; }
     lines.forEach(function(line,idx){
       var done=line.indexOf("\u2713")===0;
-      var row=document.createElement("div"); row.className="tp-row"+(done?" tp-committed":""); row.setAttribute("data-idx",idx); row.setAttribute("data-mode","");
+      var routed=line.indexOf("\u21aa")===0;
+      var row=document.createElement("div"); row.className="tp-row"+(done?" tp-committed":"")+(routed?" tp-routed":""); row.setAttribute("data-idx",idx); row.setAttribute("data-mode","");
       var txt=document.createElement("span"); txt.className="tp-txt"; txt.textContent=line;
-      var rBtn=document.createElement("button"); rBtn.type="button"; rBtn.className="tp-b route"; rBtn.textContent="Route";
+      var rBtn=document.createElement("button"); rBtn.type="button"; rBtn.className="tp-b route"; rBtn.textContent=routed?"Route again":"Route";
       var dBtn=document.createElement("button"); dBtn.type="button"; dBtn.className="tp-b done"; dBtn.textContent="Done";
       rBtn.addEventListener("click",function(){ var on=row.getAttribute("data-mode")==="route"; row.setAttribute("data-mode",on?"":"route"); rBtn.classList.toggle("on",!on); dBtn.classList.remove("on"); updateTaskSend(key); });
       dBtn.addEventListener("click",function(){ var on=row.getAttribute("data-mode")==="done"; row.setAttribute("data-mode",on?"":"done"); dBtn.classList.toggle("on",!on); rBtn.classList.remove("on"); updateTaskSend(key); });
@@ -1852,14 +1854,19 @@ var DailyOS = (function(){
     var panel=document.querySelector('[data-taskpanel="'+key+'"]'); if(!panel) return;
     var ul=document.querySelector('[data-cell="'+key+'"]'); if(!ul) return;
     var lines=taskLines(ul);
-    var routes=[], doneCount=0, changed=false;
+    var routes=[], doneCount=0, routedCount=0, changed=false;
     Array.from(panel.querySelectorAll(".tp-row")).forEach(function(row){
       var mode=row.getAttribute("data-mode"), idx=parseInt(row.getAttribute("data-idx"),10);
-      if(mode==="route"){ routes.push({ title:row.querySelector(".tp-txt").textContent.trim(), date:"", list:DEFAULT_LIST }); }
-      else if(mode==="done" && lines[idx]!=null){ if(lines[idx].indexOf("\u2713")!==0){ lines[idx]="\u2713 "+lines[idx]; changed=true; } doneCount++; }
+      if(mode==="route" && lines[idx]!=null){
+        var clean=lines[idx].replace(/^\u21aa\s*/,"").replace(/^\u2713\s*/,"").trim();
+        routes.push({ title:clean, date:"", list:DEFAULT_LIST });
+        if(lines[idx].indexOf("\u21aa")!==0){ lines[idx]="\u21aa "+clean; changed=true; }
+        routedCount++;
+      }
+      else if(mode==="done" && lines[idx]!=null){ if(lines[idx].indexOf("\u2713")!==0){ lines[idx]="\u2713 "+lines[idx].replace(/^\u21aa\s*/,""); changed=true; } doneCount++; }
     });
     if(changed){ ul.innerHTML=lines.map(function(s){ return "<li>"+tpEsc(s)+"</li>"; }).join(""); scheduleSave(); }
-    var parts=[]; if(routes.length) parts.push(routes.length+" to route"); if(doneCount) parts.push(doneCount+" marked done");
+    var parts=[]; if(routedCount) parts.push(routedCount+" routed"); if(doneCount) parts.push(doneCount+" marked done");
     toast(parts.join(" \u00b7 ")||"Nothing chosen");
     if(routes.length){ routeQueue=(routeQueue||[]).concat(routes); if(!routeCtx) processQueue(); }
     setTimeout(function(){ panel.style.display="none"; buildTaskPanel(key); },250);
