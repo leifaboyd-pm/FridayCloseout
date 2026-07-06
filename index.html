@@ -506,6 +506,13 @@
   .proj-meta{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--warm); margin-top:6px; }
   .proj-ov{ font-size:13px; line-height:1.5; color:var(--ink); margin-top:9px; white-space:pre-wrap; }
   .proj-acts{ display:flex; gap:8px; margin-top:12px; }
+  .proj-deps{ margin-top:10px; }
+  .proj-deps label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--warm); display:block; margin-bottom:5px; }
+  #pjDeps{ width:100%; min-height:66px; font-family:inherit; font-size:13px; padding:6px 8px; border:1px solid var(--line); border-radius:4px; background:var(--input-bg); color:var(--ink); }
+  #pjDeps option{ padding:3px 4px; }
+  .proj-blocked{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.03em; color:var(--red); margin-top:7px; }
+  .proj-unblocked{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.03em; color:var(--warm-lt); margin-top:7px; }
+  .dep-flag{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.06em; color:var(--red); }
 
   /* ===== batch reconcile ===== */
   .batch-row{ display:flex; align-items:center; gap:11px; padding:10px 4px;
@@ -609,6 +616,7 @@
         <button class="go" id="pjAdd">Add project</button>
       </div>
       <textarea id="pjOverview" placeholder="Overview · context · notes (optional)"></textarea>
+      <div class="proj-deps"><label>Depends on — these must finish first (⌘/Ctrl-click for several)</label><select id="pjDeps" multiple size="4"></select></div>
     </div>
     <div id="projList"></div>
   </div>
@@ -2121,6 +2129,14 @@ var DailyOS = (function(){
   function pdoc(id){ return db.collection("projects").doc(id); }
   function prioColor(pr){ return pr==="high"?"var(--green)":pr==="low"?"var(--teal-lt)":"var(--amber)"; }
   function prioRank(pr){ return pr==="high"?0:pr==="low"?2:1; }
+  function projById(id){ return projects.filter(function(x){return x.id===id;})[0]||null; }
+  function blockersOf(p){ return (p.dependsOn||[]).map(projById).filter(function(x){ return x && x.status!=="done"; }); }
+  function refreshDepOptions(selected, excludeId){
+    var sel=$("pjDeps"); if(!sel) return;
+    var cur = selected!=null ? selected : Array.prototype.map.call(sel.selectedOptions||[], function(o){return o.value;});
+    var opts=projects.filter(function(p){ return p.id!==excludeId; });
+    sel.innerHTML = opts.length ? opts.map(function(p){ return '<option value="'+esc2(p.id)+'"'+(cur.indexOf(p.id)>=0?" selected":"")+'>'+esc2(p.name)+(p.status==="done"?" \u2713":"")+'</option>'; }).join("") : '<option disabled>Add another project first</option>';
+  }
   function renderProjects(){
     var openp=projects.filter(function(p){ return p.status!=="done"; }).sort(function(a,b){ return prioRank(a.priority)-prioRank(b.priority); });
     var cb=$("cb-projects"); if(cb) cb.textContent=openp.length;
@@ -2129,16 +2145,21 @@ var DailyOS = (function(){
       if(!openp.length){ dh.innerHTML='<div class="bullet empty">No open projects. Add one in Projects.</div>'; }
       else dh.innerHTML=openp.map(function(p){
         var bits=[]; if(p.est) bits.push("est "+fmtDate(p.est)); if(p.waitingOn) bits.push("waiting on "+p.waitingOn);
-        return '<div class="bullet link" data-open="'+esc2(p.id)+'"><span><b style="color:'+prioColor(p.priority)+'">'+esc2(p.name)+'</b>'+(bits.length?' <span class="dim">\u2014 '+esc2(bits.join(" \u00b7 "))+'</span>':'')+'</span></div>';
+        var blk=blockersOf(p);
+        return '<div class="bullet link" data-open="'+esc2(p.id)+'"><span><b style="color:'+prioColor(p.priority)+'">'+esc2(p.name)+'</b>'+(blk.length?' <span class="dep-flag">\u25cf blocked</span>':'')+(bits.length?' <span class="dim">\u2014 '+esc2(bits.join(" \u00b7 "))+'</span>':'')+'</span></div>';
       }).join("");
     }
     var host=$("projList"); if(!host) return;
     if(!projects.length){ host.innerHTML='<div class="dx-empty" style="padding:22px;color:var(--warm-lt)">No projects yet. Add your first above.</div>'; return; }
+    refreshDepOptions(null, editingProj||"");
     var order={active:0,waiting:1,done:2};
     host.innerHTML=projects.slice().sort(function(a,b){ return (order[a.status]||0)-(order[b.status]||0); }).map(function(p){
       var meta=[]; if(p.est) meta.push("est "+fmtDate(p.est)); if(p.waitingOn) meta.push("waiting on "+esc2(p.waitingOn));
+      var blk=blockersOf(p);
+      var depLine = blk.length ? '<div class="proj-blocked">\u25cf Blocked by '+blk.map(function(x){return esc2(x.name);}).join(", ")+'</div>' : ((p.dependsOn&&p.dependsOn.length)?'<div class="proj-unblocked">\u2713 Prerequisites complete</div>':'');
       return '<div class="proj-card">'
         +'<div class="proj-top"><span class="proj-name">'+esc2(p.name)+'</span><span class="proj-status st-'+esc2(p.status)+'">'+esc2(p.status)+'</span><span class="proj-prio pr-'+esc2(p.priority||"medium")+'">'+esc2(p.priority||"medium")+'</span></div>'
+        +depLine
         +(meta.length?'<div class="proj-meta">'+meta.join(" \u00b7 ")+'</div>':'')
         +(p.overview?'<div class="proj-ov">'+esc2(p.overview)+'</div>':'')
         +'<div class="proj-acts"><button class="go alt small" data-edit="'+esc2(p.id)+'">Edit</button><button class="go alt small" data-del="'+esc2(p.id)+'">Delete</button></div>'
@@ -2148,15 +2169,15 @@ var DailyOS = (function(){
   function saveProject(){
     var name=($("pjName").value||"").trim(); if(!name){ toast("Name the project"); return; }
     var id=editingProj||("p_"+uid());
-    var rec={ id:id, name:name, status:$("pjStatus").value, priority:$("pjPriority").value, est:$("pjEst").value||"", waitingOn:($("pjWaiting").value||"").trim(), overview:($("pjOverview").value||"").trim(), updated_at:new Date().toISOString() };
+    var rec={ id:id, name:name, status:$("pjStatus").value, priority:$("pjPriority").value, est:$("pjEst").value||"", waitingOn:($("pjWaiting").value||"").trim(), overview:($("pjOverview").value||"").trim(), dependsOn:($("pjDeps")?Array.prototype.map.call($("pjDeps").selectedOptions,function(o){return o.value;}):[]), updated_at:new Date().toISOString() };
     if(!editingProj) rec.created_at=new Date().toISOString();
     try{ pdoc(id).set(rec,{merge:true}); }catch(e){ console.warn("project save",e); }
-    editingProj=""; $("pjName").value=""; $("pjEst").value=""; $("pjWaiting").value=""; $("pjOverview").value=""; $("pjStatus").value="active"; $("pjPriority").value="medium"; $("pjAdd").textContent="Add project";
+    editingProj=""; $("pjName").value=""; $("pjEst").value=""; $("pjWaiting").value=""; $("pjOverview").value=""; $("pjStatus").value="active"; $("pjPriority").value="medium"; refreshDepOptions([], ""); $("pjAdd").textContent="Add project";
     toast("Project saved");
   }
   function editProject(id){
     var p=projects.filter(function(x){ return x.id===id; })[0]; if(!p) return;
-    editingProj=id; $("pjName").value=p.name||""; $("pjStatus").value=p.status||"active"; $("pjPriority").value=p.priority||"medium"; $("pjEst").value=p.est||""; $("pjWaiting").value=p.waitingOn||""; $("pjOverview").value=p.overview||"";
+    editingProj=id; $("pjName").value=p.name||""; $("pjStatus").value=p.status||"active"; $("pjPriority").value=p.priority||"medium"; $("pjEst").value=p.est||""; $("pjWaiting").value=p.waitingOn||""; $("pjOverview").value=p.overview||""; refreshDepOptions(p.dependsOn||[], id);
     $("pjAdd").textContent="Save changes"; switchView("projects");
     setTimeout(function(){ $("pjName").scrollIntoView({behavior:"smooth",block:"center"}); },60);
   }
