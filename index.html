@@ -442,6 +442,29 @@
   .tp-b.done.on{ background:var(--green); border-color:var(--green); color:#fff; }
   .tp-bar{ display:flex; justify-content:flex-end; padding-top:10px; }
 
+  /* ===== brain reference layer ===== */
+  .brain-subnav{ display:flex; gap:22px; border-bottom:1px solid var(--hair); margin:14px 0 20px; overflow-x:auto; }
+  .bsub{ background:none; border:0; padding:0 0 10px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--warm); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .bsub.active{ color:var(--teal-lt); border-bottom-color:var(--teal); }
+  .ref-addbar{ display:grid; grid-template-columns:1.4fr 1.4fr .9fr auto; gap:8px; align-items:center; }
+  @media(max-width:820px){ .ref-addbar{ grid-template-columns:1fr 1fr; } }
+  .ref-addbar input,.ref-addbar select{ font-family:inherit; font-size:13px; padding:9px 11px; border:1px solid var(--line); border-radius:4px; background:var(--input-bg); color:var(--ink); }
+  .ref-list{ margin-top:16px; }
+  .ref-cat{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--teal); margin:18px 0 4px; padding-bottom:6px; border-bottom:1px solid var(--hair); }
+  .ref-cat:first-child{ margin-top:0; }
+  .ref-empty{ font-size:12px; color:var(--warm-lt); font-style:italic; padding:6px 0; }
+  .ref-row{ display:flex; align-items:flex-start; gap:11px; padding:10px 0; border-bottom:1px solid var(--hair); }
+  .ref-row:last-child{ border-bottom:0; }
+  .ck2{ width:15px; height:15px; border:1.5px solid var(--teal-lt); border-radius:50%; flex:0 0 auto; margin-top:2px; }
+  .ref-body{ flex:1; min-width:0; }
+  .ref-tx{ font-size:13.5px; color:var(--ink); line-height:1.45; }
+  .ref-note{ font-size:12px; color:var(--warm); line-height:1.45; margin-top:3px; }
+  .pill{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.04em; padding:3px 8px; border-radius:3px; border:1px solid rgba(120,210,210,.28); color:var(--teal-lt); white-space:nowrap; cursor:pointer; flex:0 0 auto; }
+  .pill.pdec{ border-color:rgba(192,122,208,.4); color:var(--purple); }
+  .pill:hover{ background:rgba(120,210,210,.08); }
+  .ref-row .bx{ border:0; background:none; color:var(--warm-lt); cursor:pointer; font-size:12px; flex:0 0 auto; padding:0 2px; }
+  .ref-row .bx:hover{ color:var(--red); }
+
   /* ===== dashboard + projects ===== */
   .dash-lede{ font-family:'Fraunces',serif; font-size:26px; font-weight:500; color:var(--ink); margin:6px 0 18px; letter-spacing:-.01em; }
   .dash-lede em{ font-style:italic; color:var(--teal-lt); }
@@ -933,11 +956,30 @@
 
   <div id="view-brain" class="view">
     <div class="dx-lede">The Brain.</div>
+    <div class="brain-subnav">
+      <button class="bsub active" data-bsub="parking">Parking Lot</button>
+      <button class="bsub" data-bsub="principle">Principles &amp; Strategies</button>
+      <button class="bsub" data-bsub="recruit">Recruiting List</button>
+      <button class="bsub" data-bsub="archive">Archive</button>
+    </div>
+    <div id="brain-ref">
+      <div class="dx-card">
+        <div class="ref-addbar">
+          <input type="text" id="biText" placeholder="Add an item…">
+          <input type="text" id="biNote" placeholder="Note (optional)">
+          <select id="biCat"></select>
+          <button class="go small" id="biAdd">Add</button>
+        </div>
+        <div class="ref-list" id="brainRefList"></div>
+      </div>
+    </div>
+    <div id="brain-archive" style="display:none">
     <div class="dx-sub">Every reconciled meeting, archived append-only and searchable. Ask by person, topic, or number — "Dan", "override", "Erik comp", "5bps".</div>
     <div class="dx-card">
       <div class="dx-addbar one"><input type="text" id="brainQ" placeholder="Search the archive…"><button class="go small" id="brainGo">Search</button></div>
       <div class="dx-secthd" style="margin-top:16px"><strong style="font-family:'Fraunces',serif;font-weight:500;font-size:17px">Archive</strong><span class="r" id="brainMeta"></span></div>
       <div class="dx-list" id="brainList"></div>
+    </div>
     </div>
   </div>
 
@@ -2193,6 +2235,161 @@ var DailyOS = (function(){
     renderBullets("dashLoops", on.slice(0,10).map(function(p){ return p.title; }), "Nothing parked. Loops land here from Reconcile.");
   }
 
+  /* ===== brain reference layer ===== */
+  var brainItems=[], brainKind="parking";
+  var BRAIN_CATS={
+    parking:["Dan \u2013 Comp & Agreement","Lender Partner Program","Operations & Long-Term Projects","Tech Ideas (Stefan)","Recruiting Ideas","General"],
+    principle:["Principles from Dan","Recruiting Goals (Peter)"],
+    recruit:["Home Run Targets","Referrers","Branches","APM"]
+  };
+  function bidoc(id){ return db.collection("brain-items").doc(id); }
+  function refreshBrainCatSelect(){
+    var sel=$("biCat"); if(!sel) return;
+    sel.innerHTML=(BRAIN_CATS[brainKind]||[]).map(function(c){ return '<option value="'+esc2(c)+'">'+esc2(c)+'</option>'; }).join("");
+  }
+  function switchBrainSub(kind){
+    brainKind=kind||"parking";
+    var btns=document.querySelectorAll(".bsub");
+    for(var i=0;i<btns.length;i++) btns[i].classList.toggle("active", btns[i].getAttribute("data-bsub")===brainKind);
+    var ref=$("brain-ref"), arc=$("brain-archive");
+    if(ref) ref.style.display=(brainKind==="archive")?"none":"block";
+    if(arc) arc.style.display=(brainKind==="archive")?"block":"none";
+    refreshBrainCatSelect(); renderBrainItems();
+  }
+  function renderBrainItems(){
+    var host=$("brainRefList"); if(!host || brainKind==="archive") return;
+    var cats=(BRAIN_CATS[brainKind]||[]).slice();
+    var items=brainItems.filter(function(i){ return i.kind===brainKind; });
+    items.forEach(function(i){ if(cats.indexOf(i.category)<0) cats.push(i.category); });
+    var isPark=(brainKind==="parking");
+    host.innerHTML=cats.map(function(cat){
+      var inCat=items.filter(function(i){ return i.category===cat; });
+      var rows = inCat.length ? inCat.map(function(i){
+        return '<div class="ref-row"><span class="ck2"></span><div class="ref-body"><div class="ref-tx">'+esc2(i.text)+'</div>'+(i.note?'<div class="ref-note">'+esc2(i.note)+'</div>':'')+'</div>'
+          +(isPark?'<span class="pill" data-promo-proj="'+esc2(i.id)+'">\u2192 Project</span><span class="pill pdec" data-promo-dec="'+esc2(i.id)+'">\u2192 Decision</span>':'')
+          +'<button class="bx" data-bidel="'+esc2(i.id)+'" title="Remove">\u2715</button></div>';
+      }).join("") : '<div class="ref-empty">Nothing here yet.</div>';
+      return '<div class="ref-cat">'+esc2(cat)+'</div>'+rows;
+    }).join("");
+  }
+  function addBrainItem(){
+    var t=($("biText").value||"").trim(); if(!t){ toast("Type something"); return; }
+    var id="b_"+uid();
+    bidoc(id).set({ id:id, kind:brainKind, category:($("biCat").value||(BRAIN_CATS[brainKind]||["General"])[0]), text:t, note:($("biNote").value||"").trim(), created_at:new Date().toISOString(), updated_at:new Date().toISOString() });
+    $("biText").value=""; $("biNote").value=""; toast("Added");
+  }
+  function delBrainItem(id){ try{ bidoc(id).delete(); }catch(e){ console.warn("bi del",e); } toast("Removed"); }
+  function promoteToProject(id){
+    var it=brainItems.filter(function(x){return x.id===id;})[0]; if(!it) return;
+    editingProj=""; switchView("projects");
+    $("pjName").value=it.text; $("pjStatus").value="active"; $("pjPriority").value="medium"; $("pjEst").value=""; $("pjWaiting").value="";
+    $("pjOverview").value=it.note||""; refreshDepOptions([], ""); $("pjAdd").textContent="Add project";
+    setTimeout(function(){ $("pjName").scrollIntoView({behavior:"smooth",block:"center"}); },60);
+    toast("Sent to Projects \u2014 review & save");
+  }
+  function promoteToDecision(id){
+    var it=brainItems.filter(function(x){return x.id===id;})[0]; if(!it) return;
+    dstate.decisions.push({ id:uid(), decision:it.text, context:it.note||"", source:"parking lot", date:todayISO() });
+    dsave(); switchView("decisions"); toast("Sent to Decisions");
+  }
+  function seedBrainIfNeeded(){
+    try{
+      bidoc("_seed").get().then(function(doc){
+        if(doc && doc.exists) return;
+        var SEED=[
+    {k:"parking",c:"Dan – Comp & Agreement",t:"Platinum club terms",n:""},
+    {k:"parking",c:"Dan – Comp & Agreement",t:"PH invoice",n:""},
+    {k:"parking",c:"Dan – Comp & Agreement",t:"Taking on Peter and his comp",n:""},
+    {k:"parking",c:"Dan – Comp & Agreement",t:"Bodnar $10-per-head plan",n:""},
+    {k:"parking",c:"Dan – Comp & Agreement",t:"Phantom stock",n:""},
+    {k:"parking",c:"Dan – Comp & Agreement",t:"JoAnn thoughts, comp",n:""},
+    {k:"parking",c:"Dan – Comp & Agreement",t:"Finalize written agreement",n:"#Dan"},
+    {k:"parking",c:"Dan – Comp & Agreement",t:"Fuel",n:""},
+    {k:"parking",c:"Dan – Comp & Agreement",t:"Holiday party allocation",n:""},
+    {k:"parking",c:"Lender Partner Program",t:"Processing help",n:"File registration and locking; condition acquisition and clearing (big one — incl. managing the appraisal through the process); refinance streamline process incl. income calc and structuring. #Tony"},
+    {k:"parking",c:"Lender Partner Program",t:"Sponsorship of events",n:""},
+    {k:"parking",c:"Lender Partner Program",t:"Meeting attendance",n:""},
+    {k:"parking",c:"Lender Partner Program",t:"Operations help",n:""},
+    {k:"parking",c:"Lender Partner Program",t:"Assist with onboarding",n:""},
+    {k:"parking",c:"Lender Partner Program",t:"Training sessions",n:""},
+    {k:"parking",c:"Lender Partner Program",t:"Help in recruiting",n:""},
+    {k:"parking",c:"Lender Partner Program",t:"Preferred pricing",n:""},
+    {k:"parking",c:"Lender Partner Program",t:"Preferred turn times",n:""},
+    {k:"parking",c:"Operations & Long-Term Projects",t:"Post turn times for top investors",n:""},
+    {k:"parking",c:"Operations & Long-Term Projects",t:"Director of Operations to manage investor meetings & relations",n:""},
+    {k:"parking",c:"Operations & Long-Term Projects",t:"Forward commitments",n:""},
+    {k:"parking",c:"Operations & Long-Term Projects",t:"Bill Bodnar knows Credit Union CEOs",n:""},
+    {k:"parking",c:"Operations & Long-Term Projects",t:"Set up Corps for our LOs — Ops Leader to manage relationships",n:""},
+    {k:"parking",c:"Operations & Long-Term Projects",t:"Put a JR in our office for Streamlines (Kind)",n:""},
+    {k:"parking",c:"Operations & Long-Term Projects",t:"CRP – Client Retention Partner",n:"Tony puts this together and he is the initial one"},
+    {k:"parking",c:"Operations & Long-Term Projects",t:"Donor and Sponsor List",n:""},
+    {k:"parking",c:"Tech Ideas (Stefan)",t:"Voicemails to database",n:""},
+    {k:"parking",c:"Tech Ideas (Stefan)",t:"Bots — can we use avatars?",n:""},
+    {k:"parking",c:"Recruiting Ideas",t:"Get underwriting under 1K",n:"Ruby Grynberg context"},
+    {k:"parking",c:"Recruiting Ideas",t:"Buy a printer vs. lease?",n:""},
+    {k:"parking",c:"Recruiting Ideas",t:"Will need 4 computers",n:""},
+    {k:"parking",c:"Recruiting Ideas",t:"Washington B+O tax",n:""},
+    {k:"principle",c:"Principles from Dan",t:"Must do by 12/31",n:""},
+    {k:"principle",c:"Principles from Dan",t:"Should do by 12/31",n:""},
+    {k:"principle",c:"Principles from Dan",t:"Won't do by 12/31",n:""},
+    {k:"principle",c:"Principles from Dan",t:"Want to do — your dream list",n:""},
+    {k:"principle",c:"Principles from Dan",t:"Reflect – Declutter – Gratitude",n:""},
+    {k:"principle",c:"Principles from Dan",t:"7 Principles of Goal Planning",n:"Stretch your goals · What is your Why? · It is not the goal that will get you there (take action) · Don't be too rigid"},
+    {k:"principle",c:"Recruiting Goals (Peter)",t:"Strengthen Digital + Marketing assets for recruiting",n:""},
+    {k:"principle",c:"Recruiting Goals (Peter)",t:"Build and maintain a scalable recruiting pipeline",n:""},
+    {k:"principle",c:"Recruiting Goals (Peter)",t:"Increase communication + accountability with Production Leadership",n:""},
+    {k:"recruit",c:"Home Run Targets",t:"Dan Landis",n:"Redding — Omega Mortgage Group"},
+    {k:"recruit",c:"Home Run Targets",t:"Scott Kirkland",n:"Root Mortgage"},
+    {k:"recruit",c:"Home Run Targets",t:"Ruby Grynberg",n:"B&O treatment questions; 401k match we have for W2 (100%); VOE disclosed up front (~70) and waive if not used. Open items: underwriting under 1K, printer vs lease, 4 computers, WA B+O tax"},
+    {k:"recruit",c:"Referrers",t:"Dustin Block",n:""},
+    {k:"recruit",c:"Referrers",t:"Deena",n:""},
+    {k:"recruit",c:"Referrers",t:"Mike H",n:""},
+    {k:"recruit",c:"Referrers",t:"Yong Choi",n:""},
+    {k:"recruit",c:"Referrers",t:"Stacy Hunjadi",n:""},
+    {k:"recruit",c:"Referrers",t:"Gina Durosko",n:""},
+    {k:"recruit",c:"Referrers",t:"Joe Bundrick",n:""},
+    {k:"recruit",c:"Referrers",t:"Dylan Thomas",n:""},
+    {k:"recruit",c:"Referrers",t:"Crystal Hughes",n:""},
+    {k:"recruit",c:"Referrers",t:"Ali Arfa",n:""},
+    {k:"recruit",c:"Branches",t:"Jeff Wagner",n:""},
+    {k:"recruit",c:"Branches",t:"Don Gidley",n:""},
+    {k:"recruit",c:"Branches",t:"Tim Mallema",n:""},
+    {k:"recruit",c:"Branches",t:"Don Russell",n:""},
+    {k:"recruit",c:"Branches",t:"Kolby Gibson",n:""},
+    {k:"recruit",c:"Branches",t:"Tyson Rondeau",n:""},
+    {k:"recruit",c:"Branches",t:"Brent Clifford",n:""},
+    {k:"recruit",c:"Branches",t:"Steve Gill",n:""},
+    {k:"recruit",c:"Branches",t:"Mike Zamani",n:""},
+    {k:"recruit",c:"Branches",t:"Maxx Zamani",n:""},
+    {k:"recruit",c:"Branches",t:"Jason Moulton",n:""},
+    {k:"recruit",c:"Branches",t:"Jeff Janke",n:""},
+    {k:"recruit",c:"Branches",t:"Tony and Wendee Close",n:""},
+    {k:"recruit",c:"Branches",t:"Jason Gallagher",n:""},
+    {k:"recruit",c:"Branches",t:"Frankie Churchill",n:""},
+    {k:"recruit",c:"Branches",t:"Todd Shafter",n:"Sierra — former Beneficial"},
+    {k:"recruit",c:"APM",t:"Jim Langdon",n:"Mortgage consultants, Gold River"},
+    {k:"recruit",c:"APM",t:"Rich Atkinson",n:"Preferred Rate"},
+    {k:"recruit",c:"APM",t:"Luz Lluncor",n:"Downey"},
+    {k:"recruit",c:"APM",t:"Emilia Marini",n:"Grass Valley 57/22M"},
+    {k:"recruit",c:"APM",t:"Dustin Maciel",n:"48/15M"},
+    {k:"recruit",c:"APM",t:"Michael Belfor",n:"Laguna"},
+    {k:"recruit",c:"APM",t:"Marcos Granda",n:"Lake Arrowhead"},
+    {k:"recruit",c:"APM",t:"Eric Handler",n:"Leif to call"},
+    {k:"recruit",c:"APM",t:"Rick Hall",n:"Modesto"},
+    {k:"recruit",c:"APM",t:"Kevin Hawes",n:""},
+    {k:"recruit",c:"APM",t:"Miguel Terrazas",n:""},
+    {k:"recruit",c:"APM",t:"Fred Arnold",n:"27M"},
+    {k:"recruit",c:"APM",t:"Michael Faulkner",n:""},
+    {k:"recruit",c:"APM",t:"Dave Setti",n:""}
+  ];
+        var batch=db.batch();
+        SEED.forEach(function(sd){ var id="b_"+uid(); batch.set(bidoc(id), { id:id, kind:sd.k, category:sd.c, text:sd.t, note:sd.n||"", created_at:new Date().toISOString(), updated_at:new Date().toISOString() }); });
+        batch.set(bidoc("_seed"), { seeded:true, at:new Date().toISOString() });
+        batch.commit().then(function(){ toast("Brain seeded"); }).catch(function(e){ console.warn("seed commit",e); });
+      }).catch(function(e){ console.warn("seed check",e); });
+    }catch(e){ console.warn("seed",e); }
+  }
+
   /* ---- tabs ---- */
   function switchView(name){
     var tabs=document.querySelectorAll(".tab");
@@ -2202,6 +2399,7 @@ var DailyOS = (function(){
     var wh=$("weekHead"); if(wh) wh.style.display=(name==="weekly")?"block":"none";
     if(name==="dashboard"){ syncDashScore(); renderDashLoops(); renderDashDecisions(); renderProjects(); }
     if(name==="projects") renderProjects();
+    if(name==="brain") switchBrainSub(brainKind);
   }
 
   var SAMPLE =
@@ -2465,6 +2663,15 @@ var DailyOS = (function(){
     try { db.collection("projects").onSnapshot(function(snap){ projects=snap.docs.map(function(d){return d.data();}); renderProjects(); }, function(err){ console.warn("projects snapshot",err); }); }
     catch(e){ console.warn("projects subscribe",e); }
     setTimeout(syncDashScore,1500); setTimeout(syncDashScore,4500);
+    document.querySelectorAll(".bsub").forEach(function(b){ b.addEventListener("click",function(){ switchBrainSub(b.getAttribute("data-bsub")); }); });
+    var bia=$("biAdd"); if(bia) bia.addEventListener("click",addBrainItem);
+    var bit=$("biText"); if(bit) bit.addEventListener("keyup",function(e){ if(e.key==="Enter") addBrainItem(); });
+    var brl=$("brainRefList"); if(brl) brl.addEventListener("click",function(e){ var t=e.target;
+      var pp=t.getAttribute&&t.getAttribute("data-promo-proj"); var pd=t.getAttribute&&t.getAttribute("data-promo-dec"); var dl=t.getAttribute&&t.getAttribute("data-bidel");
+      if(pp) promoteToProject(pp); else if(pd) promoteToDecision(pd); else if(dl) delBrainItem(dl); });
+    try { db.collection("brain-items").onSnapshot(function(snap){ brainItems=snap.docs.map(function(d){return d.data();}).filter(function(x){return x&&x.kind;}); renderBrainItems(); }, function(err){ console.warn("brain-items snapshot",err); }); }
+    catch(e){ console.warn("brain-items subscribe",e); }
+    refreshBrainCatSelect(); seedBrainIfNeeded();
     return Promise.resolve();
   }
 
