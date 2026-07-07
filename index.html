@@ -1905,7 +1905,7 @@ var DailyOS = (function(){
     if(!pending) return;
     var ba=$("dxBAction"); ba.innerHTML="";
     if(!pending.actionItems.length) ba.appendChild(empty("No action items found."));
-    pending.actionItems.forEach(function(a){ ba.appendChild(actionNode(a)); });
+    pending.actionItems.forEach(function(a){ ba.appendChild(actionNode(a, pending)); });
     fill($("dxBWaiting"), pending.waitingOn, "waiting", "Nothing owed back.");
     fill($("dxBDecision"), pending.decisions, "decision", "No decisions logged.");
     fill($("dxBFyi"), pending.fyi, "fyi", "No extra context.");
@@ -1913,7 +1913,8 @@ var DailyOS = (function(){
   function empty(t){ var d=document.createElement("div"); d.className="dx-empty"; d.textContent=t; return d; }
   function fill(host, arr, kind, emptyTxt){ host.innerHTML=""; if(!arr.length){ host.appendChild(empty(emptyTxt)); return; } arr.forEach(function(o){ host.appendChild(simpleNode(o,kind)); }); }
 
-  function actionNode(a){
+  function actionNode(a, owner){
+    owner = owner || pending || {actionItems:[]};
     var n=document.createElement("div"); n.className="dx-item";
     var t=document.createElement("input"); t.type="text"; t.className="ti"; t.value=a.title; t.style.width="100%";
     t.addEventListener("input",function(){ a.title=t.value; }); n.appendChild(t);
@@ -1931,7 +1932,7 @@ var DailyOS = (function(){
     pb.addEventListener("click",function(){ a.mode="park"; sync(); }); sync();
     seg.appendChild(rb); seg.appendChild(pb); foot.appendChild(seg);
     var del=document.createElement("button"); del.className="go alt small"; del.type="button"; del.textContent="Discard";
-    del.addEventListener("click",function(){ pending.actionItems=pending.actionItems.filter(function(x){return x!==a;}); renderResults(); });
+    del.addEventListener("click",function(){ if(owner&&owner.actionItems){ owner.actionItems=owner.actionItems.filter(function(x){return x!==a;}); } var card=n.closest ? n.closest(".dx-bucket, #dxResults") : null; if(owner===pending){ renderResults(); } else { n.remove(); } });
     foot.appendChild(del); n.appendChild(foot);
     return n;
   }
@@ -2524,7 +2525,7 @@ var DailyOS = (function(){
     } else {
       tmpPending.actionItems.forEach(function(a){
         a.id=uid(); a.group=suggestGroup(a); a.list=DEFAULT_LIST; a.mode="route";
-        aBd.appendChild(actionNode(a));
+        aBd.appendChild(actionNode(a, tmpPending));
       });
     }
     aDiv.appendChild(aBd); buckets.appendChild(aDiv);
