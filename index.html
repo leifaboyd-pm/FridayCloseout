@@ -1214,14 +1214,21 @@ function computeS2(){
   setCell("s2_pipelineVol", fmt$(plVol), plVol===0);
   setCell("s2_pipelineActive", `${plUnits} active`, plUnits===0);
 
-  // clear to close & locks: try heuristic on pipeline records
-  const ctc = pl.filter(r => /clear/i.test(r.status||r.Status||r.statusReason||r.StatusReason||"")).length;
+  // clear to close & locks — mirror the Production Dashboard's own definitions exactly
+  const ctc = pl.filter(r => (r.status==="Clear To Close") || r.clearToClose || /clear\s*to\s*close/i.test(r.status||"")).length;
   setCell("s2_clearToClose", String(ctc), ctc===0);
 
-  const locks = pl.filter(r => (r.locked===true) || /lock/i.test(r.status||r.Status||""));
-  const locksVol = locks.reduce((s,r)=>s+(Number(amtField(r))||0),0);
+  const nowLk = new Date();
+  const locks = pl.filter(r => {
+    const le = r.lockExpiration || r.lockExpirationDate;
+    if(!le || r.fundedDate || !(Number(r.loanAmount||amtField(r))>0)) return false;
+    const d = new Date(le);
+    return isNaN(d) ? true : d >= nowLk;   // count if lock is still active (or date unparseable)
+  });
+  const locksVol = locks.reduce((s,r)=>s+(Number(r.loanAmount||amtField(r))||0),0);
   setCell("s2_locks", `${locks.length} units`, locks.length===0);
   setCell("s2_locksVol", fmt$(locksVol)+" locked", locksVol===0);
+
 
   // updated stamp
   const upd = dashboardState.updatedAt ? new Date(dashboardState.updatedAt).toLocaleString() : "—";
@@ -1920,7 +1927,7 @@ var DailyOS = (function(){
     t.addEventListener("input",function(){ a.title=t.value; }); n.appendChild(t);
     if(a.context){ var cx=document.createElement("div"); cx.className="dx-hint"; cx.style.margin="4px 0 2px"; cx.textContent=a.context; n.appendChild(cx); }
     var meta=document.createElement("div"); meta.className="dx-meta";
-    var dw=document.createElement("div"); var d=document.createElement("input"); d.type="date"; d.value=a.date||""; d.addEventListener("input",function(){ a.date=d.value; }); dw.appendChild(d); meta.appendChild(dw);
+    var dw=document.createElement("div"); var d=document.createElement("input"); d.type="date"; d.value=a.date||""; d.addEventListener("input",function(){ a.date=d.value; }); d.addEventListener("change",function(){ a.date=d.value; }); dw.appendChild(d); meta.appendChild(dw);
     var lw=document.createElement("div"); var sel=document.createElement("select"); buildListSelect(sel); sel.value=a.list; if(sel.value!==a.list) a.list=sel.value; sel.addEventListener("change",function(){ a.list=sel.value; }); lw.appendChild(sel); meta.appendChild(lw);
     n.appendChild(meta);
     var foot=document.createElement("div"); foot.className="dx-foot";
@@ -2538,6 +2545,20 @@ var DailyOS = (function(){
       });
       wDiv.appendChild(wBd); buckets.appendChild(wDiv);
     }
+    if((tmpPending.decisions||[]).length){
+      var dDiv=document.createElement("div"); dDiv.className="dx-bucket";
+      dDiv.innerHTML='<div class="dx-bhd"><span class="dx-dot decision"></span>Decisions to log</div>';
+      var dBd=document.createElement("div"); dBd.className="dx-bd";
+      tmpPending.decisions.forEach(function(d){ var nn=simpleNode(d,"decision"); if(nn) dBd.appendChild(nn); });
+      dDiv.appendChild(dBd); buckets.appendChild(dDiv);
+    }
+    if((tmpPending.fyi||[]).length){
+      var fDiv=document.createElement("div"); fDiv.className="dx-bucket";
+      fDiv.innerHTML='<div class="dx-bhd"><span class="dx-dot"></span>FYI / notes</div>';
+      var fBd=document.createElement("div"); fBd.className="dx-bd";
+      tmpPending.fyi.forEach(function(f){ var nn=simpleNode(f,"fyi"); if(nn) fBd.appendChild(nn); });
+      fDiv.appendChild(fBd); buckets.appendChild(fDiv);
+    }
     card.appendChild(buckets);
     var commitBar=document.createElement("div"); commitBar.style.cssText="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)";
     var hint=document.createElement("div"); hint.className="dx-hint"; hint.textContent="Route or park each item, then commit."; commitBar.appendChild(hint);
@@ -2568,8 +2589,8 @@ var DailyOS = (function(){
     var rec={ id:aid, source:"granola", title:mtg, date:when, url:note.url||"", granola_id:note.id||"",
       my_notes:"", summary:note.truth||"",
       missed:(res.actionItems||[]).map(function(a){ return { task:a.title, context:a.context||"", list:a.list||"", date:a.date||"" }; }),
-      waiting:(res.waitingOn||[]).map(function(w){ return { who:w.who, item:w.what }; }),
-      decisions:(res.decisions||[]).map(function(d){ return d.decision+(d.context?" \u2014 "+d.context:""); }),
+      waiting:(res.waitingOn||[]).filter(function(w){return w.keep!==false;}).map(function(w){ return { who:w.who, item:w.what }; }),
+      decisions:(res.decisions||[]).filter(function(d){return d.keep!==false;}).map(function(d){ return d.decision+(d.context?" \u2014 "+d.context:""); }),
       ingested_at:new Date().toISOString() };
     try{ db.collection("meetings").doc(aid).set(rec); }catch(e){ console.warn("archive",e); }
     toast(mtg+" committed \u2014 "+parked+" parked");
