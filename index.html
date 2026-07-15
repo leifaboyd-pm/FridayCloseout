@@ -529,6 +529,9 @@
   .proj-meta{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--warm); margin-top:6px; }
   .proj-ov{ font-size:13px; line-height:1.5; color:var(--ink); margin-top:9px; white-space:pre-wrap; }
   .proj-acts{ display:flex; gap:8px; margin-top:12px; }
+  .proj-done-hd{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--warm-lt); margin:26px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--hair); }
+  .proj-card.done{ opacity:.55; border-left-color:var(--warm-lt); }
+  .proj-card.done .proj-name{ text-decoration:line-through; text-decoration-color:var(--warm-lt); }
   .proj-deps{ margin-top:10px; }
   .proj-deps label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--warm); display:block; margin-bottom:5px; }
   #pjDeps{ width:100%; min-height:66px; font-family:inherit; font-size:13px; padding:6px 8px; border:1px solid var(--line); border-radius:4px; background:var(--input-bg); color:var(--ink); }
@@ -2535,19 +2538,24 @@ var DailyOS = (function(){
     var host=$("projList"); if(!host) return;
     if(!projects.length){ host.innerHTML='<div class="dx-empty" style="padding:22px;color:var(--warm-lt)">No projects yet. Add your first above.</div>'; return; }
     refreshDepOptions(null, editingProj||"");
-    var order={active:0,waiting:1,done:2};
-    host.innerHTML=projects.slice().sort(function(a,b){ return (order[a.status]||0)-(order[b.status]||0); }).map(function(p){
+    function cardHtml(p){
       var meta=[]; if(p.est) meta.push("est "+fmtDate(p.est)); if(p.waitingOn) meta.push("waiting on "+esc2(p.waitingOn));
       var blk=blockersOf(p);
       var depLine = blk.length ? '<div class="proj-blocked">\u25cf Blocked by '+blk.map(function(x){return esc2(x.name);}).join(", ")+'</div>' : ((p.dependsOn&&p.dependsOn.length)?'<div class="proj-unblocked">\u2713 Prerequisites complete</div>':'');
-      return '<div class="proj-card">'
-        +'<div class="proj-top"><span class="proj-name">'+esc2(p.name)+'</span><span class="proj-status st-'+esc2(p.status)+'">'+esc2(p.status)+'</span><span class="proj-prio pr-'+esc2(p.priority||"medium")+'">'+esc2(p.priority||"medium")+'</span></div>'
+      return '<div class="proj-card'+(p.status==="done"?" done":"")+'">'
+        +'<div class="proj-top"><span class="proj-name">'+esc2(p.name)+'</span><span class="proj-status st-'+esc2(p.status)+'">'+esc2(p.status)+'</span>'+(p.status==="done"?'':'<span class="proj-prio pr-'+esc2(p.priority||"medium")+'">'+esc2(p.priority||"medium")+'</span>')+'</div>'
         +depLine
         +(meta.length?'<div class="proj-meta">'+meta.join(" \u00b7 ")+'</div>':'')
         +(p.overview?'<div class="proj-ov">'+esc2(p.overview)+'</div>':'')
         +'<div class="proj-acts"><button class="go alt small" data-edit="'+esc2(p.id)+'">Edit</button><button class="go alt small" data-del="'+esc2(p.id)+'">Delete</button></div>'
         +'</div>';
-    }).join("");
+    }
+    var order={active:0,waiting:1};
+    var act=projects.filter(function(p){return p.status!=="done";}).sort(function(a,b){ return (order[a.status]||0)-(order[b.status]||0) || prioRank(a.priority)-prioRank(b.priority); });
+    var done=projects.filter(function(p){return p.status==="done";});
+    var html=act.map(cardHtml).join("");
+    if(done.length){ html+='<div class="proj-done-hd">Done \u00b7 '+done.length+'</div>'+done.map(cardHtml).join(""); }
+    host.innerHTML=html;
   }
   function saveProject(){
     var name=($("pjName").value||"").trim(); if(!name){ toast("Name the project"); return; }
