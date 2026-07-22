@@ -248,8 +248,9 @@
   .dx-empty{color:var(--warm);font-size:12.5px;padding:16px;text-align:center}
   .dx-item{border:1px solid var(--line);border-radius:5px;padding:11px;margin:7px;background:var(--paper)}
   .dx-item .ti{font-weight:600;font-size:13.5px}
-  .dx-meta{display:grid;grid-template-columns:128px 1fr;gap:7px;margin-top:8px}
-  .dx-meta input,.dx-meta select{font-size:12.5px;padding:7px 8px}
+  .dx-meta{display:grid;grid-template-columns:minmax(0,210px) minmax(0,150px);gap:8px;margin-top:8px;align-items:center}
+  .dx-meta input,.dx-meta select{width:100%;font-size:12.5px;padding:7px 8px}
+  .dx-meta input[type=datetime-local]{color-scheme:dark}
   .dx-sub2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
   .dx-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap}
   .dx-seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--input-bg)}
