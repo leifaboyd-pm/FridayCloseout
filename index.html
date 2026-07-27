@@ -442,6 +442,35 @@
   .tp-b.done.on{ background:var(--green); border-color:var(--green); color:#fff; }
   .tp-bar{ display:flex; justify-content:flex-end; padding-top:10px; }
 
+  /* ===== monday processor ===== */
+  .mon-drop{border:1.5px dashed var(--line);border-radius:6px;padding:26px;text-align:center;cursor:pointer;transition:border-color .15s}
+  .mon-drop:hover,.mon-drop.over{border-color:var(--teal)}
+  .mon-drop-t{font-family:'Fraunces',serif;font-size:16px;color:var(--ink)}
+  .mon-drop-s{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--warm-lt);margin-top:6px}
+  .mon-sec{margin-top:16px}
+  .mon-h{font-family:'Fraunces',serif;font-size:18px;font-weight:500;color:var(--ink);margin-bottom:4px}
+  .mon-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal-lt);margin-left:6px}
+  .mon-summary{font-size:13.5px;line-height:1.55;color:var(--ink);font-style:italic;margin:8px 0 12px;padding-left:12px;border-left:2px solid var(--teal-deep)}
+  .mon-list{display:flex;flex-direction:column}
+  .mon-done-row{padding:7px 0 7px 20px;position:relative;font-size:13px;color:var(--warm);border-bottom:1px solid var(--hair)}
+  .mon-done-row:last-child{border-bottom:0}
+  .mon-done-row::before{content:"\2713";position:absolute;left:2px;color:var(--green)}
+  .mon-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--hair);flex-wrap:wrap}
+  .mon-row:last-child{border-bottom:0}
+  .mon-status{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:3px;flex:0 0 auto}
+  .st-notstarted{background:rgba(255,255,255,.06);color:var(--warm-lt)}
+  .st-inprogress{background:rgba(21,154,166,.16);color:var(--teal-lt)}
+  .st-migrated{background:var(--amber-bg);color:var(--amber)}
+  .mon-tx{flex:1;min-width:150px;font-size:13.5px;color:var(--ink)}
+  .mon-seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;flex:0 0 auto}
+  .mon-seg button{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.04em;padding:5px 10px;background:none;border:0;border-left:1px solid var(--line);color:var(--warm);cursor:pointer}
+  .mon-seg button:first-child{border-left:0}
+  .mon-seg button[aria-pressed="true"]{background:var(--teal);color:#08201f}
+  .mon-donebtn{border:0;background:none;color:var(--warm-lt);cursor:pointer;font-size:14px;flex:0 0 auto;padding:0 4px}
+  .mon-donebtn:hover{color:var(--green)}
+  .mon-carry{width:100%;min-height:130px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.55;padding:12px;border:1px solid var(--line);border-radius:4px;background:var(--input-bg);color:var(--ink);resize:vertical}
+  .mon-acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
   /* ===== brain reference layer ===== */
   .brain-subnav{ display:flex; gap:22px; border-bottom:1px solid var(--hair); margin:14px 0 20px; overflow-x:auto; }
   .bsub{ background:none; border:0; padding:0 0 10px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--warm); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
@@ -591,7 +620,7 @@
   <nav class="cc-nav fade" id="tabnav" role="tablist">
     <button class="tab active" data-view="dashboard" role="tab">Dashboard</button>
     <button class="tab" data-view="projects" role="tab">Projects <span class="cbadge cb-teal" id="cb-projects">0</span></button>
-    <button class="tab" data-view="weekly" role="tab">Weekly Closeout</button>
+    <button class="tab" data-view="monday" role="tab">Monday</button>
     <button class="tab" data-view="capture" role="tab">Reconcile</button>
     <button class="tab" data-view="loops" role="tab">Open Loops <span class="cbadge cb-teal" id="cb-loops">0</span></button>
     <button class="tab" data-view="waiting" role="tab">Waiting On <span class="cbadge cb-gold" id="cb-waiting">0</span></button>
@@ -601,6 +630,17 @@
   </nav>
 
   <div id="view-dashboard" class="view active">
+    <div class="dash-score">
+      <div class="dash-score-hd"><span class="lbl">BUSINESS SCOREBOARD · MTD</span><span class="dash-live" id="dashScoreTag">● loading…</span></div>
+      <div class="dash-metrics">
+        <div class="dm"><div class="dm-l">FUNDED VOL</div><div class="dm-v gold" id="d-fundedVol">—</div><div class="dm-s" id="d-fundedVolPct">—</div></div>
+        <div class="dm"><div class="dm-l">UNITS</div><div class="dm-v" id="d-fundedUnits">—</div><div class="dm-s" id="d-fundedUnitsPace">—</div></div>
+        <div class="dm"><div class="dm-l">AVG SIZE</div><div class="dm-v" id="d-avgSize">—</div><div class="dm-s">per loan</div></div>
+        <div class="dm"><div class="dm-l">PIPELINE</div><div class="dm-v" id="d-pipelineVol">—</div><div class="dm-s" id="d-pipelineActive">—</div></div>
+        <div class="dm"><div class="dm-l">CLEAR TO CLOSE</div><div class="dm-v" id="d-clearToClose">—</div><div class="dm-s">ready to fund</div></div>
+        <div class="dm"><div class="dm-l">ACTIVE LOCKS</div><div class="dm-v" id="d-locks">—</div><div class="dm-s" id="d-locksVol">—</div></div>
+      </div>
+    </div>
     <section id="tab-morning" class="morning-scope">
   <div class="m-wrap" style="max-width:none;padding:0 0 22px">
     <div class="m-head">
@@ -654,17 +694,6 @@
     <div class="m-foot"><span id="m-src">Source: —</span></div>
   </div>
 </section>
-    <div class="dash-score">
-      <div class="dash-score-hd"><span class="lbl">BUSINESS SCOREBOARD · MTD</span><span class="dash-live" id="dashScoreTag">● loading…</span></div>
-      <div class="dash-metrics">
-        <div class="dm"><div class="dm-l">FUNDED VOL</div><div class="dm-v gold" id="d-fundedVol">—</div><div class="dm-s" id="d-fundedVolPct">—</div></div>
-        <div class="dm"><div class="dm-l">UNITS</div><div class="dm-v" id="d-fundedUnits">—</div><div class="dm-s" id="d-fundedUnitsPace">—</div></div>
-        <div class="dm"><div class="dm-l">AVG SIZE</div><div class="dm-v" id="d-avgSize">—</div><div class="dm-s">per loan</div></div>
-        <div class="dm"><div class="dm-l">PIPELINE</div><div class="dm-v" id="d-pipelineVol">—</div><div class="dm-s" id="d-pipelineActive">—</div></div>
-        <div class="dm"><div class="dm-l">CLEAR TO CLOSE</div><div class="dm-v" id="d-clearToClose">—</div><div class="dm-s">ready to fund</div></div>
-        <div class="dm"><div class="dm-l">ACTIVE LOCKS</div><div class="dm-v" id="d-locks">—</div><div class="dm-s" id="d-locksVol">—</div></div>
-      </div>
-    </div>
     <div class="dash-cards">
       <div class="dash-card">
         <div class="dash-card-hd"><span class="sn">◆</span><span class="st">Outstanding Projects</span><button class="go alt small" data-view-jump="projects" style="margin-left:auto">Manage →</button></div>
@@ -1006,6 +1035,41 @@
     <div class="dx-card">
       <div class="dx-list" id="dxDecList"></div>
       <div class="dx-addbar one"><input type="text" id="dxDText" placeholder="What was decided…"><button class="go alt small" id="dxDAdd">Log it</button></div>
+    </div>
+  </div>
+
+  <div id="view-monday" class="view">
+    <div class="dash-lede">Monday. <em>Process last week.</em></div>
+    <div class="dx-card">
+      <div class="mon-drop" id="monDrop">
+        <input type="file" id="monFile" accept="image/*,application/pdf" hidden>
+        <div class="mon-drop-t" id="monDropT">Drop last week's bullet-journal page (PNG / JPG / PDF)</div>
+        <div class="mon-drop-s">or tap to choose · Claude reads your X (done), • (open), ⊙ (in progress), › (migrated)</div>
+      </div>
+      <button class="go" id="monRun" disabled style="margin-top:14px">Process the week</button>
+      <div id="monProg" class="mon-hint" style="display:none;margin-top:10px">Reading your page…</div>
+    </div>
+    <div id="monResults" style="display:none">
+      <div class="dx-card mon-sec">
+        <div class="mon-h">Completed last week <span class="mon-count" id="monDoneN"></span></div>
+        <div class="mon-summary" id="monSummary"></div>
+        <div class="mon-list" id="monDoneList"></div>
+        <button class="go alt small" id="monArchive" style="margin-top:12px">Archive completed to Brain</button>
+      </div>
+      <div class="dx-card mon-sec">
+        <div class="mon-h">Still open <span class="mon-count" id="monOpenN"></span></div>
+        <div class="mon-hint">Tap Remind / Carry / Drop for each. Migrated (›) default to Carry. Hit ✓ if it's actually done.</div>
+        <div class="mon-list" id="monOpenList"></div>
+      </div>
+      <div class="dx-card mon-sec">
+        <div class="mon-h">Carry-forward</div>
+        <div class="mon-hint">Everything marked Carry, formatted for Notability. Copy it into next week's page.</div>
+        <textarea id="monCarry" class="mon-carry" readonly></textarea>
+        <div class="mon-acts">
+          <button class="go small" id="monCopy">Copy for Notability</button>
+          <button class="go alt small" id="monRemind">Send Reminders to Inbox</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2745,6 +2809,70 @@ var DailyOS = (function(){
     }catch(e){ console.warn("seed",e); }
   }
 
+  /* ===== monday processor ===== */
+  var monUploaded=null, monTasks=[], monSummary="";
+  var MON_PROMPT='You are reading a photo or PDF of Leif Boyd\'s handwritten BULLET JOURNAL weekly task page. Classify EVERY task line by its leading signifier: an X (or a crossed-out / filled-in dot) = DONE; a plain open dot = OPEN, NOT STARTED; a dot with a circle around it = OPEN, IN PROGRESS; a dot followed by a right-facing arrow (> or \u203a) = MIGRATED to next week. Return ONLY valid JSON, no prose, no markdown, no code fences. Shape: {"summary":"one or two warm sentences on what got done last week","tasks":[{"text":"the task, transcribed and tidied","status":"done|notstarted|inprogress|migrated"}]}. Transcribe every task line you can read. If a mark is ambiguous, prefer notstarted. Keep task text faithful but clean.';
+  function monNormStatus(x){ x=String(x||"").toLowerCase(); if(/done|complet|^x$|finish/.test(x)) return "done"; if(/migrat|moved|next week|arrow/.test(x)) return "migrated"; if(/progress|circl|active|started/.test(x)) return "inprogress"; return "notstarted"; }
+  function monStatusLabel(st){ return st==="inprogress"?"in progress":st==="migrated"?"migrated \u203a":"not started"; }
+  async function monProcess(){
+    if(!monUploaded){ toast("Drop your page first"); return; }
+    if(!settings.apiKey){ toast("Set your API key in Settings"); return; }
+    var prog=$("monProg"), btn=$("monRun");
+    if(prog) prog.style.display="block"; if(btn){ btn.disabled=true; btn.textContent="Reading\u2026"; }
+    try{
+      var b64=await fileToBase64(monUploaded); var mime=monUploaded.type||"image/png"; var isPdf=/pdf/i.test(mime);
+      var body={ model:MODEL, max_tokens:3000, messages:[{ role:"user", content:[ { type:isPdf?"document":"image", source:{ type:"base64", media_type:mime, data:b64 } }, { type:"text", text:MON_PROMPT } ] }] };
+      var res=await fetch("https://api.anthropic.com/v1/messages",{ method:"POST", headers:{ "x-api-key":settings.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true", "Content-Type":"application/json" }, body:JSON.stringify(body) });
+      var data=await res.json();
+      var txt=(data.content||[]).map(function(c){return c.text||"";}).join("").replace(/```json|```/g,"").trim();
+      var parsed=JSON.parse(txt);
+      monSummary=parsed.summary||"";
+      monTasks=(parsed.tasks||[]).map(function(t,i){ var st=monNormStatus(t.status); return { id:"m"+i+"_"+uid(), text:(t.text||"").trim(), status:st, disp:"carry" }; }).filter(function(t){ return t.text; });
+      renderMon();
+      var rr=$("monResults"); if(rr) rr.style.display="block";
+    }catch(e){ console.warn("monProcess",e); toast("Couldn't read that page \u2014 try a clearer photo"); }
+    if(prog) prog.style.display="none"; if(btn){ btn.disabled=false; btn.textContent="Process the week"; }
+  }
+  function renderMon(){
+    var done=monTasks.filter(function(t){return t.status==="done";});
+    var open=monTasks.filter(function(t){return t.status!=="done";});
+    var dn=$("monDoneN"); if(dn) dn.textContent=done.length?("\u00b7 "+done.length):"";
+    var on=$("monOpenN"); if(on) on.textContent=open.length?("\u00b7 "+open.length):"";
+    var sm=$("monSummary"); if(sm) sm.textContent=monSummary||"";
+    var dl=$("monDoneList"); if(dl) dl.innerHTML= done.length ? done.map(function(t){ return '<div class="mon-done-row">'+esc2(t.text)+'</div>'; }).join("") : '<div class="mon-hint">Nothing marked done.</div>';
+    var ol=$("monOpenList");
+    if(ol){
+      ol.innerHTML= open.length ? open.map(function(t){
+        function seg(d,lbl){ return '<button data-mondisp="'+t.id+'|'+d+'" aria-pressed="'+(t.disp===d)+'">'+lbl+'</button>'; }
+        return '<div class="mon-row"><span class="mon-status st-'+t.status+'">'+monStatusLabel(t.status)+'</span>'
+          +'<span class="mon-tx">'+esc2(t.text)+'</span>'
+          +'<div class="mon-seg">'+seg("reminder","Remind")+seg("carry","Carry")+seg("drop","Drop")+'</div>'
+          +'<button class="mon-donebtn" data-mondone="'+t.id+'" title="Actually done">\u2713</button></div>';
+      }).join("") : '<div class="mon-hint">Nothing still open \u2014 clean week.</div>';
+    }
+    var carry=open.filter(function(t){return t.disp==="carry";});
+    var lbl=(typeof currentWeekLabel==="function")?currentWeekLabel():new Date().toLocaleDateString();
+    var ta=$("monCarry"); if(ta) ta.value = carry.length ? ("Carry forward \u2014 "+lbl+"\n\n"+carry.map(function(t){return "\u2022 "+t.text;}).join("\n")) : "";
+    var rN=open.filter(function(t){return t.disp==="reminder";}).length;
+    var rb=$("monRemind"); if(rb) rb.textContent="Send Reminders to Inbox"+(rN?(" ("+rN+")"):"");
+  }
+  function monSetDisp(id,d){ var t=monTasks.filter(function(x){return x.id===id;})[0]; if(t){ t.disp=d; renderMon(); } }
+  function monMarkDone(id){ var t=monTasks.filter(function(x){return x.id===id;})[0]; if(t){ t.status="done"; renderMon(); } }
+  function monArchive(){
+    var done=monTasks.filter(function(t){return t.status==="done";});
+    if(!done.length){ toast("Nothing completed to archive"); return; }
+    var lbl=(typeof currentWeekLabel==="function")?currentWeekLabel():new Date().toLocaleDateString();
+    var id="mon_"+uid();
+    var rec={ id:id, source:"monday", title:"Week of "+lbl+" \u2014 Completed", date:todayISO(), url:"", granola_id:"", my_notes:"", summary:monSummary||"",
+      missed:done.map(function(t){ return { task:t.text, context:"", list:"", date:"" }; }), waiting:[], decisions:[], ingested_at:new Date().toISOString() };
+    try{ db.collection("meetings").doc(id).set(rec); toast("Completed week archived to the Brain"); }catch(e){ console.warn("mon archive",e); toast("Archive failed"); }
+  }
+  function monSendReminders(){
+    var routes=monTasks.filter(function(t){return t.status!=="done"&&t.disp==="reminder";}).map(function(t){ return { title:t.text, date:"", list:DEFAULT_LIST }; });
+    if(!routes.length){ toast("No tasks marked Remind"); return; }
+    routeQueue=(routeQueue||[]).concat(routes); if(!routeCtx) processQueue();
+  }
+
   /* ---- tabs ---- */
   function switchView(name){
     var tabs=document.querySelectorAll(".tab");
@@ -3042,6 +3170,20 @@ var DailyOS = (function(){
     catch(e){ console.warn("brain-items subscribe",e); }
     refreshBrainCatSelect(); seedBrainIfNeeded();
     try{ if(window.MorningTab) MorningTab.init(); }catch(_e){ console.warn("morning init",_e); }
+    var mDrop=$("monDrop"), mFile=$("monFile");
+    if(mDrop&&mFile){
+      mDrop.addEventListener("click",function(){ mFile.click(); });
+      mDrop.addEventListener("dragover",function(e){ e.preventDefault(); mDrop.classList.add("over"); });
+      mDrop.addEventListener("dragleave",function(){ mDrop.classList.remove("over"); });
+      mDrop.addEventListener("drop",function(e){ e.preventDefault(); mDrop.classList.remove("over"); if(e.dataTransfer.files&&e.dataTransfer.files[0]) monSetFile(e.dataTransfer.files[0]); });
+      mFile.addEventListener("change",function(){ if(mFile.files&&mFile.files[0]) monSetFile(mFile.files[0]); });
+    }
+    function monSetFile(f){ monUploaded=f; var t=$("monDropT"); if(t) t.textContent=f.name; var b=$("monRun"); if(b) b.disabled=false; }
+    var mRun=$("monRun"); if(mRun) mRun.addEventListener("click",monProcess);
+    var mArch=$("monArchive"); if(mArch) mArch.addEventListener("click",monArchive);
+    var mCopy=$("monCopy"); if(mCopy) mCopy.addEventListener("click",function(){ var ta=$("monCarry"); if(!ta||!ta.value){ toast("Nothing to copy"); return; } ta.select(); try{ document.execCommand("copy"); }catch(_e){} if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).catch(function(){}); } toast("Copied for Notability"); });
+    var mRem=$("monRemind"); if(mRem) mRem.addEventListener("click",monSendReminders);
+    var mOpen=$("monOpenList"); if(mOpen) mOpen.addEventListener("click",function(e){ var t=e.target; var dp=t.getAttribute&&t.getAttribute("data-mondisp"); var dn=t.getAttribute&&t.getAttribute("data-mondone"); if(dp){ var p=dp.split("|"); monSetDisp(p[0],p[1]); } else if(dn){ monMarkDone(dn); } });
     return Promise.resolve();
   }
 
