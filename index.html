@@ -468,6 +468,13 @@
   .mon-seg button[aria-pressed="true"]{background:var(--teal);color:#08201f}
   .mon-donebtn{border:0;background:none;color:var(--warm-lt);cursor:pointer;font-size:14px;flex:0 0 auto;padding:0 4px}
   .mon-donebtn:hover{color:var(--green)}
+  .mon-prio-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--hair)}
+  .mon-prio-row:last-child{border-bottom:0}
+  .mon-prio-n{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--amber);width:18px;flex:0 0 auto;text-align:center}
+  .mon-prio-tx{flex:1;font-size:13.5px;color:var(--ink)}
+  .mon-prio-ctl{display:flex;gap:2px;flex:0 0 auto}
+  .mon-prio-ctl button{border:0;background:none;color:var(--warm-lt);cursor:pointer;font-size:13px;padding:2px 6px}
+  .mon-prio-ctl button:hover{color:var(--teal-lt)}
   .mon-carry{width:100%;min-height:90px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.7;padding:14px;border:1px solid var(--line);border-radius:4px;background:var(--input-bg);color:var(--ink);resize:vertical;overflow:hidden}
   .mon-acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 
@@ -1062,6 +1069,12 @@
         <div class="mon-list" id="monOpenList"></div>
       </div>
       <div class="dx-card mon-sec">
+        <div class="mon-h">This week's priorities <span class="mon-count">Morning shows these</span></div>
+        <div class="mon-hint">Claude's suggested top tasks — reorder with ↑↓, trim, or add your own. The top of this list is what your Morning surfaces.</div>
+        <div class="mon-list" id="monPrioList"></div>
+        <div class="dash-add" style="margin-top:10px"><input type="text" id="monPrioInput" placeholder="Add a priority…"><button class="go small" id="monPrioAdd">Add</button></div>
+      </div>
+      <div class="dx-card mon-sec">
         <div class="mon-h">Carry-forward</div>
         <div class="mon-hint">Everything marked Carry, formatted for Notability. Copy it into next week's page.</div>
         <textarea id="monCarry" class="mon-carry" spellcheck="false"></textarea>
@@ -1241,16 +1254,19 @@
     if(!d){ var s=seeded(); s.parking=localParking; MS.src='seeded sample'; return Promise.resolve(s); }
     return Promise.all([
       d.collection('projects').get().then(toArr).catch(function(){ return null; }),
-      d.collection('daily-execution').doc('main').get().then(function(doc){ var dd=(doc&&doc.exists&&doc.data())||{}; return Array.isArray(dd.parked)?dd.parked:[]; }).catch(function(){ return null; }),
+      d.collection('daily-execution').doc('main').get().then(function(doc){ return (doc&&doc.exists&&doc.data())||{}; }).catch(function(){ return null; }),
       d.collection('brain-items').get().then(toArr).catch(function(){ return null; })
     ]).then(function(res){
-      var rawP=res[0], rawParked=res[1], rawBrain=res[2];
-      if(!rawP && !rawParked){ var s=seeded(); s.parking=localParking; MS.src='seeded (collections not found)'; return s; }
+      var rawP=res[0], ddoc=res[1]||{}, rawBrain=res[2];
+      if(!rawP && !res[1]){ var s=seeded(); s.parking=localParking; MS.src='seeded (collections not found)'; return s; }
+      var rawParked=Array.isArray(ddoc.parked)?ddoc.parked:[];
+      var weekPrio=Array.isArray(ddoc.weekPriorities)?ddoc.weekPriorities:[];
       var projects=(rawP||[]).filter(function(p){ return p && p.status!=='done'; }).map(mapProject);
-      var loops=(rawParked||[]).filter(function(p){ return p && p.status==='parked' && !p.fyi; }).map(mapLoop);
+      var loops=rawParked.filter(function(p){ return p && p.status==='parked' && !p.fyi; }).map(mapLoop);
       var parking=(rawBrain||[]).filter(function(x){ return x && x.kind==='parking'; }).map(function(x){ return x.text||''; }).filter(Boolean);
+      var priorities = weekPrio.length ? weekPrio.map(function(t){ return { title:String(t), why:'' }; }) : derivePriorities(projects,loops);
       MS.src='live · Firestore';
-      return { projects:projects, loops:loops, parking:parking.length?parking:localParking, priorities:derivePriorities(projects,loops) };
+      return { projects:projects, loops:loops, parking:parking.length?parking:localParking, priorities:priorities };
     }).catch(function(){ var s=seeded(); s.parking=localParking; MS.src='seeded (Firestore read failed)'; return s; });
   }
 
@@ -2213,7 +2229,8 @@ var DailyOS = (function(){
     waiting:Array.isArray(s.waiting)?s.waiting:[],
     decisions:Array.isArray(s.decisions)?s.decisions:[],
     fyi:Array.isArray(s.fyi)?s.fyi:[],
-    openDecisions:Array.isArray(s.openDecisions)?s.openDecisions:[] }; }
+    openDecisions:Array.isArray(s.openDecisions)?s.openDecisions:[],
+    weekPriorities:Array.isArray(s.weekPriorities)?s.weekPriorities:[] }; }
 
   function ddoc(){ return db.collection("daily-execution").doc("main"); }
   function dsave(){ try { return ddoc().set(dstate); } catch(e){ console.warn("dsave",e); } }
@@ -2810,8 +2827,8 @@ var DailyOS = (function(){
   }
 
   /* ===== monday processor ===== */
-  var monUploaded=null, monTasks=[], monSummary="";
-  var MON_PROMPT='You are reading a photo or PDF of Leif Boyd\'s handwritten BULLET JOURNAL weekly task page. Classify EVERY task line by its leading signifier: an X (or a crossed-out / filled-in dot) = DONE; a plain open dot = OPEN, NOT STARTED; a dot with a circle around it = OPEN, IN PROGRESS; a dot followed by a right-facing arrow (> or \u203a) = MIGRATED to next week. Return ONLY valid JSON, no prose, no markdown, no code fences. Shape: {"summary":"one or two warm sentences on what got done last week","tasks":[{"text":"the task, transcribed and tidied","status":"done|notstarted|inprogress|migrated"}]}. Transcribe every task line you can read. If a mark is ambiguous, prefer notstarted. Keep task text faithful but clean.';
+  var monUploaded=null, monTasks=[], monSummary="", monPriorities=[];
+  var MON_PROMPT='You are reading a photo or PDF of Leif Boyd\'s handwritten BULLET JOURNAL weekly task page. Classify EVERY task line by its leading signifier: an X (or a crossed-out / filled-in dot) = DONE; a plain open dot = OPEN, NOT STARTED; a dot with a circle around it = OPEN, IN PROGRESS; a dot followed by a right-facing arrow (> or \u203a) = MIGRATED to next week. Return ONLY valid JSON, no prose, no markdown, no code fences. Shape: {"summary":"one or two warm sentences on what got done last week","priorities":["the 5 to 7 highest-consequence tasks that are NOT done, most important first, each short"],"tasks":[{"text":"the task, transcribed and tidied","status":"done|notstarted|inprogress|migrated"}]}. Transcribe every task line you can read. If a mark is ambiguous, prefer notstarted. Keep task text faithful but clean.';
   function monNormStatus(x){ x=String(x||"").toLowerCase(); if(/done|complet|^x$|finish/.test(x)) return "done"; if(/migrat|moved|next week|arrow/.test(x)) return "migrated"; if(/progress|circl|active|started/.test(x)) return "inprogress"; return "notstarted"; }
   function monStatusLabel(st){ return st==="inprogress"?"in progress":st==="migrated"?"migrated \u203a":"not started"; }
   async function monProcess(){
@@ -2828,7 +2845,9 @@ var DailyOS = (function(){
       var parsed=JSON.parse(txt);
       monSummary=parsed.summary||"";
       monTasks=(parsed.tasks||[]).map(function(t,i){ var st=monNormStatus(t.status); return { id:"m"+i+"_"+uid(), text:(t.text||"").trim(), status:st, disp:"carry" }; }).filter(function(t){ return t.text; });
-      renderMon();
+      var openTexts=monTasks.filter(function(t){return t.status!=="done";}).map(function(t){return t.text;});
+      monPriorities=(Array.isArray(parsed.priorities)&&parsed.priorities.length?parsed.priorities:openTexts.slice(0,6)).map(function(x){return String(x).trim();}).filter(Boolean);
+      renderMon(); renderMonPriorities(); monSavePriorities();
       var rr=$("monResults"); if(rr) rr.style.display="block";
     }catch(e){ console.warn("monProcess",e); toast("Couldn't read that page \u2014 try a clearer photo"); }
     if(prog) prog.style.display="none"; if(btn){ btn.disabled=false; btn.textContent="Process the week"; }
@@ -2857,6 +2876,14 @@ var DailyOS = (function(){
     var rb=$("monRemind"); if(rb) rb.textContent="Send Reminders to Inbox"+(rN?(" ("+rN+")"):"");
   }
   function monAutosize(ta){ if(!ta) return; ta.style.height="auto"; ta.style.height=(ta.scrollHeight+4)+"px"; }
+  function renderMonPriorities(){
+    var host=$("monPrioList"); if(!host) return;
+    if(!monPriorities.length){ host.innerHTML='<div class="mon-hint">No priorities yet \u2014 add your own below.</div>'; return; }
+    host.innerHTML=monPriorities.map(function(p,i){
+      return '<div class="mon-prio-row"><span class="mon-prio-n">'+(i+1)+'</span><span class="mon-prio-tx">'+esc2(p)+'</span><span class="mon-prio-ctl"><button data-prioup="'+i+'" title="Up">\u2191</button><button data-priodn="'+i+'" title="Down">\u2193</button><button data-priox="'+i+'" title="Remove">\u2715</button></span></div>';
+    }).join("");
+  }
+  function monSavePriorities(){ try{ if(typeof dstate==="object" && dstate){ dstate.weekPriorities=monPriorities.slice(); dsave(); } }catch(e){ console.warn("save week prio",e); } }
   function monSetDisp(id,d){ var t=monTasks.filter(function(x){return x.id===id;})[0]; if(t){ t.disp=d; renderMon(); } }
   function monMarkDone(id){ var t=monTasks.filter(function(x){return x.id===id;})[0]; if(t){ t.status="done"; renderMon(); } }
   function monArchive(){
@@ -3186,6 +3213,8 @@ var DailyOS = (function(){
     var mRem=$("monRemind"); if(mRem) mRem.addEventListener("click",monSendReminders);
     var mCarryTa=$("monCarry"); if(mCarryTa) mCarryTa.addEventListener("input",function(){ monAutosize(mCarryTa); });
     var mOpen=$("monOpenList"); if(mOpen) mOpen.addEventListener("click",function(e){ var t=e.target; var dp=t.getAttribute&&t.getAttribute("data-mondisp"); var dn=t.getAttribute&&t.getAttribute("data-mondone"); if(dp){ var p=dp.split("|"); monSetDisp(p[0],p[1]); } else if(dn){ monMarkDone(dn); } });
+    var mPrio=$("monPrioList"); if(mPrio) mPrio.addEventListener("click",function(e){ var t=e.target; var u=t.getAttribute&&t.getAttribute("data-prioup"); var dn=t.getAttribute&&t.getAttribute("data-priodn"); var x=t.getAttribute&&t.getAttribute("data-priox"); if(u!=null&&u!==""){ u=+u; if(u>0){ var a=monPriorities[u-1]; monPriorities[u-1]=monPriorities[u]; monPriorities[u]=a; renderMonPriorities(); monSavePriorities(); } } else if(dn!=null&&dn!==""){ dn=+dn; if(dn<monPriorities.length-1){ var b=monPriorities[dn+1]; monPriorities[dn+1]=monPriorities[dn]; monPriorities[dn]=b; renderMonPriorities(); monSavePriorities(); } } else if(x!=null&&x!==""){ x=+x; monPriorities.splice(x,1); renderMonPriorities(); monSavePriorities(); } });
+    var mPrioAdd=$("monPrioAdd"); if(mPrioAdd) mPrioAdd.addEventListener("click",function(){ var v=($("monPrioInput").value||"").trim(); if(!v) return; monPriorities.push(v); $("monPrioInput").value=""; renderMonPriorities(); monSavePriorities(); });
     return Promise.resolve();
   }
 
