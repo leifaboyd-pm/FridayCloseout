@@ -2849,6 +2849,7 @@ var DailyOS = (function(){
       monPriorities=(Array.isArray(parsed.priorities)&&parsed.priorities.length?parsed.priorities:openTexts.slice(0,6)).map(function(x){return String(x).trim();}).filter(Boolean);
       renderMon(); renderMonPriorities(); monSavePriorities();
       var rr=$("monResults"); if(rr) rr.style.display="block";
+      requestAnimationFrame(function(){ monAutosize($("monCarry")); });
     }catch(e){ console.warn("monProcess",e); toast("Couldn't read that page \u2014 try a clearer photo"); }
     if(prog) prog.style.display="none"; if(btn){ btn.disabled=false; btn.textContent="Process the week"; }
   }
@@ -2875,7 +2876,7 @@ var DailyOS = (function(){
     var rN=open.filter(function(t){return t.disp==="reminder";}).length;
     var rb=$("monRemind"); if(rb) rb.textContent="Send Reminders to Inbox"+(rN?(" ("+rN+")"):"");
   }
-  function monAutosize(ta){ if(!ta) return; ta.style.height="auto"; ta.style.height=(ta.scrollHeight+4)+"px"; }
+  function monAutosize(ta){ if(!ta) return; ta.style.height="auto"; var h=ta.scrollHeight; if(!h){ h=((ta.value.split("\n").length+1)*22); } ta.style.height=(h+6)+"px"; }
   function renderMonPriorities(){
     var host=$("monPrioList"); if(!host) return;
     if(!monPriorities.length){ host.innerHTML='<div class="mon-hint">No priorities yet \u2014 add your own below.</div>'; return; }
