@@ -1070,7 +1070,8 @@
       </div>
       <div class="dx-card mon-sec">
         <div class="mon-h">This week's priorities <span class="mon-count">Morning shows these</span></div>
-        <div class="mon-hint">Claude's suggested top tasks — reorder with ↑↓, trim, or add your own. The top of this list is what your Morning surfaces.</div>
+        <div class="mon-hint">Reconcile the open tasks above first (mark done ✓, drop the dead ones). Then build your priorities from what's left — reorder with ↑↓, trim, or add. The top is what Morning surfaces.</div>
+        <button class="go alt small" id="monPrioBuild" style="margin-bottom:12px">Build from what's still open</button>
         <div class="mon-list" id="monPrioList"></div>
         <div class="dash-add" style="margin-top:10px"><input type="text" id="monPrioInput" placeholder="Add a priority…"><button class="go small" id="monPrioAdd">Add</button></div>
       </div>
@@ -2845,9 +2846,8 @@ var DailyOS = (function(){
       var parsed=JSON.parse(txt);
       monSummary=parsed.summary||"";
       monTasks=(parsed.tasks||[]).map(function(t,i){ var st=monNormStatus(t.status); return { id:"m"+i+"_"+uid(), text:(t.text||"").trim(), status:st, disp:"carry" }; }).filter(function(t){ return t.text; });
-      var openTexts=monTasks.filter(function(t){return t.status!=="done";}).map(function(t){return t.text;});
-      monPriorities=(Array.isArray(parsed.priorities)&&parsed.priorities.length?parsed.priorities:openTexts.slice(0,6)).map(function(x){return String(x).trim();}).filter(Boolean);
-      renderMon(); renderMonPriorities(); monSavePriorities();
+      monPriorities=[];
+      renderMon(); renderMonPriorities();
       var rr=$("monResults"); if(rr) rr.style.display="block";
       requestAnimationFrame(function(){ monAutosize($("monCarry")); });
     }catch(e){ console.warn("monProcess",e); toast("Couldn't read that page \u2014 try a clearer photo"); }
@@ -2879,7 +2879,7 @@ var DailyOS = (function(){
   function monAutosize(ta){ if(!ta) return; ta.style.height="auto"; var h=ta.scrollHeight; if(!h){ h=((ta.value.split("\n").length+1)*22); } ta.style.height=(h+6)+"px"; }
   function renderMonPriorities(){
     var host=$("monPrioList"); if(!host) return;
-    if(!monPriorities.length){ host.innerHTML='<div class="mon-hint">No priorities yet \u2014 add your own below.</div>'; return; }
+    if(!monPriorities.length){ host.innerHTML='<div class="mon-hint">Nothing yet \u2014 reconcile above, then hit \u201cBuild from what\u2019s still open.\u201d</div>'; return; }
     host.innerHTML=monPriorities.map(function(p,i){
       return '<div class="mon-prio-row"><span class="mon-prio-n">'+(i+1)+'</span><span class="mon-prio-tx">'+esc2(p)+'</span><span class="mon-prio-ctl"><button data-prioup="'+i+'" title="Up">\u2191</button><button data-priodn="'+i+'" title="Down">\u2193</button><button data-priox="'+i+'" title="Remove">\u2715</button></span></div>';
     }).join("");
@@ -3215,6 +3215,7 @@ var DailyOS = (function(){
     var mCarryTa=$("monCarry"); if(mCarryTa) mCarryTa.addEventListener("input",function(){ monAutosize(mCarryTa); });
     var mOpen=$("monOpenList"); if(mOpen) mOpen.addEventListener("click",function(e){ var t=e.target; var dp=t.getAttribute&&t.getAttribute("data-mondisp"); var dn=t.getAttribute&&t.getAttribute("data-mondone"); if(dp){ var p=dp.split("|"); monSetDisp(p[0],p[1]); } else if(dn){ monMarkDone(dn); } });
     var mPrio=$("monPrioList"); if(mPrio) mPrio.addEventListener("click",function(e){ var t=e.target; var u=t.getAttribute&&t.getAttribute("data-prioup"); var dn=t.getAttribute&&t.getAttribute("data-priodn"); var x=t.getAttribute&&t.getAttribute("data-priox"); if(u!=null&&u!==""){ u=+u; if(u>0){ var a=monPriorities[u-1]; monPriorities[u-1]=monPriorities[u]; monPriorities[u]=a; renderMonPriorities(); monSavePriorities(); } } else if(dn!=null&&dn!==""){ dn=+dn; if(dn<monPriorities.length-1){ var b=monPriorities[dn+1]; monPriorities[dn+1]=monPriorities[dn]; monPriorities[dn]=b; renderMonPriorities(); monSavePriorities(); } } else if(x!=null&&x!==""){ x=+x; monPriorities.splice(x,1); renderMonPriorities(); monSavePriorities(); } });
+    var mPrioBuild=$("monPrioBuild"); if(mPrioBuild) mPrioBuild.addEventListener("click",function(){ var kept=monTasks.filter(function(t){ return t.status!=="done" && (t.disp==="carry"||t.disp==="reminder"); }).map(function(t){ return t.text; }); if(!kept.length){ toast("Nothing kept open to prioritize"); return; } monPriorities=kept.slice(); renderMonPriorities(); monSavePriorities(); toast("Priorities built from your open tasks"); });
     var mPrioAdd=$("monPrioAdd"); if(mPrioAdd) mPrioAdd.addEventListener("click",function(){ var v=($("monPrioInput").value||"").trim(); if(!v) return; monPriorities.push(v); $("monPrioInput").value=""; renderMonPriorities(); monSavePriorities(); });
     return Promise.resolve();
   }
