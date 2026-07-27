@@ -468,7 +468,7 @@
   .mon-seg button[aria-pressed="true"]{background:var(--teal);color:#08201f}
   .mon-donebtn{border:0;background:none;color:var(--warm-lt);cursor:pointer;font-size:14px;flex:0 0 auto;padding:0 4px}
   .mon-donebtn:hover{color:var(--green)}
-  .mon-carry{width:100%;min-height:130px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.55;padding:12px;border:1px solid var(--line);border-radius:4px;background:var(--input-bg);color:var(--ink);resize:vertical}
+  .mon-carry{width:100%;min-height:90px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.7;padding:14px;border:1px solid var(--line);border-radius:4px;background:var(--input-bg);color:var(--ink);resize:vertical;overflow:hidden}
   .mon-acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 
   /* ===== brain reference layer ===== */
@@ -1064,7 +1064,7 @@
       <div class="dx-card mon-sec">
         <div class="mon-h">Carry-forward</div>
         <div class="mon-hint">Everything marked Carry, formatted for Notability. Copy it into next week's page.</div>
-        <textarea id="monCarry" class="mon-carry" readonly></textarea>
+        <textarea id="monCarry" class="mon-carry" spellcheck="false"></textarea>
         <div class="mon-acts">
           <button class="go small" id="monCopy">Copy for Notability</button>
           <button class="go alt small" id="monRemind">Send Reminders to Inbox</button>
@@ -2852,10 +2852,11 @@ var DailyOS = (function(){
     }
     var carry=open.filter(function(t){return t.disp==="carry";});
     var lbl=(typeof currentWeekLabel==="function")?currentWeekLabel():new Date().toLocaleDateString();
-    var ta=$("monCarry"); if(ta) ta.value = carry.length ? ("Carry forward \u2014 "+lbl+"\n\n"+carry.map(function(t){return "\u2022 "+t.text;}).join("\n")) : "";
+    var ta=$("monCarry"); if(ta){ ta.value = carry.length ? ("Carry forward \u2014 "+lbl+"\n\n"+carry.map(function(t){return "\u2022  "+t.text;}).join("\n\n")) : ""; monAutosize(ta); }
     var rN=open.filter(function(t){return t.disp==="reminder";}).length;
     var rb=$("monRemind"); if(rb) rb.textContent="Send Reminders to Inbox"+(rN?(" ("+rN+")"):"");
   }
+  function monAutosize(ta){ if(!ta) return; ta.style.height="auto"; ta.style.height=(ta.scrollHeight+4)+"px"; }
   function monSetDisp(id,d){ var t=monTasks.filter(function(x){return x.id===id;})[0]; if(t){ t.disp=d; renderMon(); } }
   function monMarkDone(id){ var t=monTasks.filter(function(x){return x.id===id;})[0]; if(t){ t.status="done"; renderMon(); } }
   function monArchive(){
@@ -3183,6 +3184,7 @@ var DailyOS = (function(){
     var mArch=$("monArchive"); if(mArch) mArch.addEventListener("click",monArchive);
     var mCopy=$("monCopy"); if(mCopy) mCopy.addEventListener("click",function(){ var ta=$("monCarry"); if(!ta||!ta.value){ toast("Nothing to copy"); return; } ta.select(); try{ document.execCommand("copy"); }catch(_e){} if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).catch(function(){}); } toast("Copied for Notability"); });
     var mRem=$("monRemind"); if(mRem) mRem.addEventListener("click",monSendReminders);
+    var mCarryTa=$("monCarry"); if(mCarryTa) mCarryTa.addEventListener("input",function(){ monAutosize(mCarryTa); });
     var mOpen=$("monOpenList"); if(mOpen) mOpen.addEventListener("click",function(e){ var t=e.target; var dp=t.getAttribute&&t.getAttribute("data-mondisp"); var dn=t.getAttribute&&t.getAttribute("data-mondone"); if(dp){ var p=dp.split("|"); monSetDisp(p[0],p[1]); } else if(dn){ monMarkDone(dn); } });
     return Promise.resolve();
   }
