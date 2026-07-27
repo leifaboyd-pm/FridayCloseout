@@ -1070,7 +1070,7 @@
       </div>
       <div class="dx-card mon-sec">
         <div class="mon-h">This week's priorities <span class="mon-count">Morning shows these</span></div>
-        <div class="mon-hint">Reconcile the open tasks above first (mark done ✓, drop the dead ones). Then build your priorities from what's left — reorder with ↑↓, trim, or add. The top is what Morning surfaces.</div>
+        <div class="mon-hint">Reconcile the open tasks above first (✓ done archives it; Drop kills it). Then Claude picks the 5–7 highest-consequence from what's left — reorder with ↑↓, trim, or add. The top is what Morning surfaces.</div>
         <button class="go alt small" id="monPrioBuild" style="margin-bottom:12px">Build from what's still open</button>
         <div class="mon-list" id="monPrioList"></div>
         <div class="dash-add" style="margin-top:10px"><input type="text" id="monPrioInput" placeholder="Add a priority…"><button class="go small" id="monPrioAdd">Add</button></div>
@@ -2867,7 +2867,7 @@ var DailyOS = (function(){
         return '<div class="mon-row"><span class="mon-status st-'+t.status+'">'+monStatusLabel(t.status)+'</span>'
           +'<span class="mon-tx">'+esc2(t.text)+'</span>'
           +'<div class="mon-seg">'+seg("reminder","Remind")+seg("carry","Carry")+seg("drop","Drop")+'</div>'
-          +'<button class="mon-donebtn" data-mondone="'+t.id+'" title="Actually done">\u2713</button></div>';
+          +'<button class="mon-donebtn" data-mondone="'+t.id+'" title="Mark actually done \u2014 archives to Brain">\u2713 done</button></div>';
       }).join("") : '<div class="mon-hint">Nothing still open \u2014 clean week.</div>';
     }
     var carry=open.filter(function(t){return t.disp==="carry";});
@@ -2883,6 +2883,24 @@ var DailyOS = (function(){
     host.innerHTML=monPriorities.map(function(p,i){
       return '<div class="mon-prio-row"><span class="mon-prio-n">'+(i+1)+'</span><span class="mon-prio-tx">'+esc2(p)+'</span><span class="mon-prio-ctl"><button data-prioup="'+i+'" title="Up">\u2191</button><button data-priodn="'+i+'" title="Down">\u2193</button><button data-priox="'+i+'" title="Remove">\u2715</button></span></div>';
     }).join("");
+  }
+  async function monBuildPriorities(){
+    var kept=monTasks.filter(function(t){ return t.status!=="done" && t.disp!=="drop"; }).map(function(t){ return t.text; });
+    if(!kept.length){ toast("Nothing kept open to prioritize"); return; }
+    var btn=$("monPrioBuild");
+    if(!settings.apiKey){ monPriorities=kept.slice(0,7); renderMonPriorities(); monSavePriorities(); toast("Set your API key for Claude ranking \u2014 used top 7"); return; }
+    if(btn){ btn.disabled=true; btn.textContent="Asking Claude\u2026"; }
+    try{
+      var prompt="Here are Leif Boyd\'s remaining OPEN tasks for the week (bullet-journal items he kept). Choose the 5 to 7 HIGHEST-CONSEQUENCE ones \u2014 what most moves the business or unblocks people \u2014 and return them RANKED, most important first. Keep each item\'s wording close to the original. Return ONLY a JSON array of strings, no prose, no code fences.\n\nTASKS:\n"+kept.map(function(t){return "- "+t;}).join("\n");
+      var res=await fetch("https://api.anthropic.com/v1/messages",{ method:"POST", headers:{ "x-api-key":settings.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true", "Content-Type":"application/json" }, body:JSON.stringify({ model:MODEL, max_tokens:800, messages:[{ role:"user", content:prompt }] }) });
+      var data=await res.json();
+      var txt=(data.content||[]).map(function(c){return c.text||"";}).join("").replace(/```json|```/g,"").trim();
+      var arr=JSON.parse(txt);
+      monPriorities = (Array.isArray(arr)&&arr.length) ? arr.map(function(x){return String(x).trim();}).filter(Boolean).slice(0,7) : kept.slice(0,7);
+      toast("Claude ranked your top "+monPriorities.length);
+    }catch(e){ console.warn("build prio",e); monPriorities=kept.slice(0,7); toast("Used top 7 \u2014 AI ranking hiccup"); }
+    renderMonPriorities(); monSavePriorities();
+    if(btn){ btn.disabled=false; btn.textContent="Rebuild from what\u2019s still open"; }
   }
   function monSavePriorities(){ try{ if(typeof dstate==="object" && dstate){ dstate.weekPriorities=monPriorities.slice(); dsave(); } }catch(e){ console.warn("save week prio",e); } }
   function monSetDisp(id,d){ var t=monTasks.filter(function(x){return x.id===id;})[0]; if(t){ t.disp=d; renderMon(); } }
@@ -3215,7 +3233,7 @@ var DailyOS = (function(){
     var mCarryTa=$("monCarry"); if(mCarryTa) mCarryTa.addEventListener("input",function(){ monAutosize(mCarryTa); });
     var mOpen=$("monOpenList"); if(mOpen) mOpen.addEventListener("click",function(e){ var t=e.target; var dp=t.getAttribute&&t.getAttribute("data-mondisp"); var dn=t.getAttribute&&t.getAttribute("data-mondone"); if(dp){ var p=dp.split("|"); monSetDisp(p[0],p[1]); } else if(dn){ monMarkDone(dn); } });
     var mPrio=$("monPrioList"); if(mPrio) mPrio.addEventListener("click",function(e){ var t=e.target; var u=t.getAttribute&&t.getAttribute("data-prioup"); var dn=t.getAttribute&&t.getAttribute("data-priodn"); var x=t.getAttribute&&t.getAttribute("data-priox"); if(u!=null&&u!==""){ u=+u; if(u>0){ var a=monPriorities[u-1]; monPriorities[u-1]=monPriorities[u]; monPriorities[u]=a; renderMonPriorities(); monSavePriorities(); } } else if(dn!=null&&dn!==""){ dn=+dn; if(dn<monPriorities.length-1){ var b=monPriorities[dn+1]; monPriorities[dn+1]=monPriorities[dn]; monPriorities[dn]=b; renderMonPriorities(); monSavePriorities(); } } else if(x!=null&&x!==""){ x=+x; monPriorities.splice(x,1); renderMonPriorities(); monSavePriorities(); } });
-    var mPrioBuild=$("monPrioBuild"); if(mPrioBuild) mPrioBuild.addEventListener("click",function(){ var kept=monTasks.filter(function(t){ return t.status!=="done" && (t.disp==="carry"||t.disp==="reminder"); }).map(function(t){ return t.text; }); if(!kept.length){ toast("Nothing kept open to prioritize"); return; } monPriorities=kept.slice(); renderMonPriorities(); monSavePriorities(); toast("Priorities built from your open tasks"); });
+    var mPrioBuild=$("monPrioBuild"); if(mPrioBuild) mPrioBuild.addEventListener("click",monBuildPriorities);
     var mPrioAdd=$("monPrioAdd"); if(mPrioAdd) mPrioAdd.addEventListener("click",function(){ var v=($("monPrioInput").value||"").trim(); if(!v) return; monPriorities.push(v); $("monPrioInput").value=""; renderMonPriorities(); monSavePriorities(); });
     return Promise.resolve();
   }
