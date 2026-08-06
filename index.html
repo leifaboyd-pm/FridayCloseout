@@ -442,6 +442,36 @@
   .tp-b.done.on{ background:var(--green); border-color:var(--green); color:#fff; }
   .tp-bar{ display:flex; justify-content:flex-end; padding-top:10px; }
 
+  /* ===== meeting reconciliation ===== */
+  .mr-all{margin-bottom:16px;border-left:3px solid var(--teal)}
+  .mr-all-hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .mr-all-t{font-family:'Fraunces',serif;font-size:18px;font-weight:500;color:var(--ink)}
+  .mr-all-n{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--teal-lt)}
+  .mr-ta{width:100%;min-height:80px;margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.7;padding:13px;border:1px solid var(--line);border-radius:4px;background:var(--input-bg);color:var(--ink);resize:vertical;overflow:hidden}
+  .mr-all-acts{display:flex;justify-content:flex-end;margin-top:9px}
+  .mr-card{margin-bottom:12px}
+  .mr-hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .mr-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;color:var(--ink)}
+  .mr-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--warm-lt)}
+  .mr-sub{display:flex;align-items:center;gap:12px;margin:5px 0 8px;flex-wrap:wrap}
+  .mr-n{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--warm)}
+  .mr-src{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--warm-lt);margin-left:auto}
+  .mr-toggle{background:none;border:0;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;color:var(--teal-lt);cursor:pointer;padding:0;text-decoration:underline}
+  .mr-list{border-top:1px solid var(--hair)}
+  .mr-row{padding:9px 0 9px 16px;border-bottom:1px solid var(--hair);cursor:pointer;position:relative}
+  .mr-row:last-child{border-bottom:0}
+  .mr-row::before{content:"";position:absolute;left:2px;top:15px;width:5px;height:5px;border-radius:50%;background:var(--teal-lt)}
+  .mr-row:hover{background:rgba(120,210,210,.04)}
+  .mr-row.struck .mr-tx{text-decoration:line-through;text-decoration-color:var(--red);color:var(--warm-lt)}
+  .mr-row.struck::before{background:var(--warm-lt)}
+  .mr-row.struck .mr-ctx{opacity:.45}
+  .mr-row.other{opacity:.6}
+  .mr-tx{display:block;font-size:13.5px;line-height:1.45;color:var(--ink)}
+  .mr-own{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-left:5px}
+  .mr-ctx{display:block;font-size:12px;line-height:1.45;color:var(--warm);margin-top:3px}
+  .mr-empty{font-size:12px;color:var(--warm-lt);font-style:italic;padding:9px 0}
+  .mr-acts{display:flex;justify-content:flex-end;margin-top:10px}
+
   /* ===== kanban board ===== */
   .kb-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 12px;flex-wrap:wrap}
   .kb-top-l{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -968,7 +998,7 @@
   <!-- ===== DAILY EXECUTION VIEWS ===== -->
   <div id="view-capture" class="view">
     <div class="dx-lede">Meeting Reconciliation. <em>Straight into Notability.</em></div>
-    <div class="dx-sub">Check the meetings you want. Claude diffs each one and surfaces only the delta — the commitments you made but didn't write down. Each meeting gives you a copy-paste block for your Notability to-do list; decisions archive to the Brain on commit.</div>
+    <div class="dx-sub">Check the meetings you want. Actions come straight from Granola's next steps — yours filtered from everyone else's — and fall back to a Claude read if a meeting has none. Tap a line to strike it, then copy one block into Notability.</div>
 
     <div class="dx-card">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
@@ -2765,15 +2795,16 @@ var DailyOS = (function(){
       .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
       .then(function(n){
         var tx=Array.isArray(n.transcript)?n.transcript.map(function(u){return (u.text||"");}).join(" "):"";
+        var sm=n.summary||n.notes_markdown||n.ai_summary||n.overview||"";
         return { id:id, title:n.title||"Untitled", date:(n.created_at||n.created||n.date||"").slice(0,10),
-                 url:n.url||n.share_url||"", truth:(n.summary||"")+(tx?"\n\nTRANSCRIPT:\n"+tx:"") };
+                 url:n.url||n.share_url||"", summary:sm, truth:sm+(tx?"\n\nTRANSCRIPT:\n"+tx:"") };
       });
   }
   function runBatchReconcile(){
     var cbs=Array.from(document.querySelectorAll(".batch-cb:checked"));
     if(!cbs.length){ toast("Check at least one meeting"); return; }
     var ids=cbs.map(function(c){return c.value;});
-    var host=$("dxBatchResults"); host.innerHTML="";
+    var host=$("dxBatchResults"); host.innerHTML=""; mrMeetings=[];
     var btn=$("dxBatchBtn"); if(btn) btn.disabled=true;
     var prog=$("dxProgress"); if(prog) prog.style.display="flex";
     var done=0, total=ids.length;
@@ -2788,11 +2819,18 @@ var DailyOS = (function(){
       }
       setStatus("Reconciling "+(i+1)+" of "+total+"\u2026","Fetching from Granola");
       fetchGranolaNote(ids[i]).then(function(note){
-        setStatus("Reconciling "+(i+1)+" of "+total+"\u2026","Claude is reading the meeting");
+        var ns=parseNextSteps(note.summary);
+        if(ns){
+          setStatus("Reading "+(i+1)+" of "+total+"\u2026","Granola next steps");
+          done++;
+          mrMeetings.push({ note:note, items:mrItemsFromGranola(ns), src:"granola", showOthers:false });
+          mrRender(); next(i+1); return null;
+        }
+        setStatus("Reconciling "+(i+1)+" of "+total+"\u2026","No next steps \u2014 Claude is reading it");
         return callExtract("", note.truth).then(function(res){
           done++;
-          renderBatchCard(host, note, res);
-          next(i+1);
+          mrMeetings.push({ note:note, items:mrItemsFromClaude(res), src:"claude", showOthers:false });
+          mrRender(); next(i+1);
         });
       }).catch(function(e){
         done++;
@@ -2805,81 +2843,94 @@ var DailyOS = (function(){
     }
     next(0);
   }
-  function renderBatchCard(host, note, res){
-    var card=document.createElement("div"); card.className="dx-card batch-result-card"; card.style.marginBottom="16px";
-    var titleBar='<div class="batch-card-hd"><span class="batch-card-title">'+esc(note.title)+'</span><span class="batch-card-date">'+esc(fmtDate(note.date))+'</span></div>';
-    card.innerHTML=titleBar;
-    var buckets=document.createElement("div"); buckets.className="dx-buckets"; buckets.style.marginTop="10px";
-    var tmpPending=res;
-    var aDiv=document.createElement("div"); aDiv.className="dx-bucket";
-    aDiv.innerHTML='<div class="dx-bhd"><span class="dx-dot action"></span>Commitments you didn\'t write down</div>';
-    var aBd=document.createElement("div"); aBd.className="dx-bd";
-    if(!(tmpPending.actionItems||[]).length){
-      var e=document.createElement("div"); e.className="dx-empty"; e.style.padding="14px"; e.textContent="Nothing missed \u2014 you got it all."; aBd.appendChild(e);
-    } else {
-      tmpPending.actionItems.forEach(function(a){
-        a.id=uid(); a.group=suggestGroup(a); a.list=DEFAULT_LIST; a.mode="route";
-        aBd.appendChild(actionNode(a, tmpPending));
-      });
-    }
-    aDiv.appendChild(aBd); buckets.appendChild(aDiv);
-    if((tmpPending.waitingOn||[]).length){
-      var wDiv=document.createElement("div"); wDiv.className="dx-bucket";
-      wDiv.innerHTML='<div class="dx-bhd"><span class="dx-dot waiting"></span>Waiting on</div>';
-      var wBd=document.createElement("div"); wBd.className="dx-bd";
-      tmpPending.waitingOn.forEach(function(w){
-        var n=simpleNode(w,"waiting"); if(n) wBd.appendChild(n);
-      });
-      wDiv.appendChild(wBd); buckets.appendChild(wDiv);
-    }
-    if((tmpPending.decisions||[]).length){
-      var dDiv=document.createElement("div"); dDiv.className="dx-bucket";
-      dDiv.innerHTML='<div class="dx-bhd"><span class="dx-dot decision"></span>Decisions to log</div>';
-      var dBd=document.createElement("div"); dBd.className="dx-bd";
-      tmpPending.decisions.forEach(function(d){ var nn=simpleNode(d,"decision"); if(nn) dBd.appendChild(nn); });
-      dDiv.appendChild(dBd); buckets.appendChild(dDiv);
-    }
-    if((tmpPending.fyi||[]).length){
-      var fDiv=document.createElement("div"); fDiv.className="dx-bucket";
-      fDiv.innerHTML='<div class="dx-bhd"><span class="dx-dot"></span>FYI / notes</div>';
-      var fBd=document.createElement("div"); fBd.className="dx-bd";
-      tmpPending.fyi.forEach(function(f){ var nn=simpleNode(f,"fyi"); if(nn) fBd.appendChild(nn); });
-      fDiv.appendChild(fBd); buckets.appendChild(fDiv);
-    }
-    card.appendChild(buckets);
-    var nb=document.createElement("div"); nb.className="nb-wrap";
-    var nbh=document.createElement("div"); nbh.className="nb-h"; nbh.textContent="For Notability"; nb.appendChild(nbh);
-    var nbHint=document.createElement("div"); nbHint.className="dx-hint"; nbHint.textContent="Action items and waiting-on, formatted for your to-do list. Discard anything above first, then copy."; nb.appendChild(nbHint);
-    var nbTa=document.createElement("textarea"); nbTa.className="nb-ta"; nbTa.spellcheck=false; nbTa.value=notabilityBlock(note,tmpPending); nb.appendChild(nbTa);
-    nbTa.addEventListener("input",function(){ monAutosize(nbTa); });
-    var nbBar=document.createElement("div"); nbBar.className="nb-acts";
-    var nbRe=document.createElement("button"); nbRe.className="go alt small"; nbRe.type="button"; nbRe.textContent="Refresh";
-    nbRe.addEventListener("click",function(){ nbTa.value=notabilityBlock(note,tmpPending); monAutosize(nbTa); });
-    var nbCopy=document.createElement("button"); nbCopy.className="go small"; nbCopy.type="button"; nbCopy.textContent="Copy for Notability";
-    nbCopy.addEventListener("click",function(){ if(!nbTa.value.trim()){ toast("Nothing to copy"); return; } nbTa.select(); try{ document.execCommand("copy"); }catch(_e){} if(navigator.clipboard){ navigator.clipboard.writeText(nbTa.value).catch(function(){}); } toast("Copied for Notability"); });
-    nbBar.appendChild(nbRe); nbBar.appendChild(nbCopy); nb.appendChild(nbBar);
-    card.appendChild(nb);
-    requestAnimationFrame(function(){ monAutosize(nbTa); });
-    var commitBar=document.createElement("div"); commitBar.style.cssText="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)";
-    var hint=document.createElement("div"); hint.className="dx-hint"; hint.textContent="Commit archives this meeting \u2014 decisions land in the Brain."; commitBar.appendChild(hint);
-    var commitBtn=document.createElement("button"); commitBtn.className="go small"; commitBtn.type="button"; commitBtn.textContent="Commit";
-    commitBtn.addEventListener("click",function(){
-      commitCard(note, tmpPending, function(parked){
-        card.style.opacity="0.45"; commitBtn.disabled=true; commitBtn.textContent="Committed";
-      });
+  /* ===== meeting reconciliation: Granola Next Steps first, Claude as fallback ===== */
+  var mrMeetings=[];
+  function parseNextSteps(md){
+    if(!md) return null;
+    var lines=String(md).split(/\r?\n/), start=-1;
+    for(var i=0;i<lines.length;i++){ if(/^#{1,6}\s*next steps\b/i.test(lines[i].trim())){ start=i+1; break; } }
+    if(start<0) return null;
+    var block=[];
+    for(var j=start;j<lines.length;j++){ if(/^#{1,6}\s+/.test(lines[j])) break; block.push(lines[j]); }
+    var items=[], cur=null;
+    block.forEach(function(ln){
+      var m=ln.match(/^\s*[-*+]\s+(.*)$/);
+      if(m){
+        if(cur) items.push(cur);
+        var body=m[1].trim(), owner="";
+        var om=body.match(/\(([^()]{1,40})\)\s*$/);
+        if(om){ owner=om[1].trim(); body=body.slice(0,om.index).trim(); }
+        body=body.replace(/\*\*/g,"").replace(/`/g,"").trim();
+        cur={ text:body, owner:owner, context:"" };
+      } else if(cur){
+        var t=ln.trim();
+        if(t) cur.context=(cur.context?cur.context+" ":"")+t.replace(/\*\*/g,"");
+      }
     });
-    commitBar.appendChild(commitBtn); card.appendChild(commitBar);
-    host.appendChild(card);
+    if(cur) items.push(cur);
+    items=items.filter(function(x){ return x.text; });
+    return items.length?items:null;
   }
-  function notabilityBlock(note,res){
-    if(!res) return "";
-    var lines=[];
-    (res.actionItems||[]).forEach(function(a){ var t=(a.title||"").trim(); if(t) lines.push(t); });
-    (res.waitingOn||[]).forEach(function(w){ if(w.keep===false) return; var who=(w.who||"").trim(), what=(w.what||"").trim(); if(who||what) lines.push("Waiting on "+(who?who:"")+(who&&what?" \u2014 ":"")+(what?what:"")); });
-    if(!lines.length) return "";
-    var hd=(note.title||"Meeting")+(note.date?(" \u2014 "+fmtDate(note.date)):"");
-    return hd+"\n\n"+lines.map(function(t){ return "\u2022  "+t; }).join("\n\n");
+  function ownerIsMine(o){ if(!o) return true; return /leif|\bme\b|myself/i.test(o); }
+  function mrItemsFromGranola(list){
+    return list.map(function(x){ return { text:x.text, owner:x.owner||"", context:x.context||"", mine:ownerIsMine(x.owner), excluded:false }; });
   }
+  function mrItemsFromClaude(res){
+    return ((res&&res.actionItems)||[]).map(function(a){ return { text:(a.title||"").trim(), owner:"", context:a.context||"", mine:true, excluded:false }; }).filter(function(x){ return x.text; });
+  }
+  function mrKept(m){ return m.items.filter(function(it){ return it.mine && !it.excluded; }); }
+  function mrBlockFor(m){
+    var k=mrKept(m); if(!k.length) return "";
+    return m.note.title+"\n\n"+k.map(function(it){ return "\u2022  "+it.text; }).join("\n\n");
+  }
+  function mrBlockAll(){
+    var parts=mrMeetings.map(mrBlockFor).filter(Boolean);
+    if(!parts.length) return "";
+    return "Meeting actions \u2014 "+fmtDate(todayISO())+"\n\n"+parts.join("\n\n\n");
+  }
+  function mrRender(){
+    var host=$("dxBatchResults"); if(!host) return;
+    if(!mrMeetings.length){ host.innerHTML=""; return; }
+    var totalKept=mrMeetings.reduce(function(n,m){ return n+mrKept(m).length; },0);
+    var html='<div class="dx-card mr-all">'
+      +'<div class="mr-all-hd"><span class="mr-all-t">For Notability</span><span class="mr-all-n">'+totalKept+' action'+(totalKept===1?"":"s")+' \u00b7 '+mrMeetings.length+' meeting'+(mrMeetings.length===1?"":"s")+'</span></div>'
+      +'<div class="dx-hint">Tap any line below to strike it out. This block updates live \u2014 one copy for the whole session.</div>'
+      +'<textarea id="mrAllTa" class="mr-ta" spellcheck="false"></textarea>'
+      +'<div class="mr-all-acts"><button class="go small" type="button" id="mrCopyAll">Copy all for Notability</button></div>'
+      +'</div>';
+    html+=mrMeetings.map(function(m,mi){
+      var mineN=m.items.filter(function(it){return it.mine;}).length, allN=m.items.length, others=allN-mineN;
+      var rows=m.items.map(function(it,ii){
+        if(!it.mine && !m.showOthers) return "";
+        return '<div class="mr-row'+(it.excluded?" struck":"")+(it.mine?"":" other")+'" data-mi="'+mi+'" data-ii="'+ii+'">'
+          +'<span class="mr-tx">'+esc2(it.text)+(it.mine?"":' <span class="mr-own">'+esc2(it.owner)+'</span>')+'</span>'
+          +(it.context?'<span class="mr-ctx">'+esc2(it.context)+'</span>':'')
+          +'</div>';
+      }).join("");
+      return '<div class="dx-card mr-card">'
+        +'<div class="mr-hd"><span class="mr-title">'+esc2(m.note.title)+'</span><span class="mr-date">'+esc2(fmtDate(m.note.date))+'</span></div>'
+        +'<div class="mr-sub"><span class="mr-n">'+allN+' action'+(allN===1?"":"s")+' \u00b7 '+mineN+' yours</span>'
+          +(others?'<button class="mr-toggle" type="button" data-others="'+mi+'">'+(m.showOthers?"hide":"show")+" "+others+' assigned to others</button>':'')
+          +'<span class="mr-src">'+(m.src==="granola"?"Granola next steps":"Claude extract")+'</span></div>'
+        +'<div class="mr-list">'+(rows||'<div class="mr-empty">Nothing for you here.</div>')+'</div>'
+        +'<div class="mr-acts"><button class="go alt small" type="button" data-mrarch="'+mi+'">Archive to Brain</button></div>'
+        +'</div>';
+    }).join("");
+    host.innerHTML=html;
+    var ta=$("mrAllTa"); if(ta){ ta.value=mrBlockAll(); monAutosize(ta); ta.addEventListener("input",function(){ monAutosize(ta); }); }
+    var cp=$("mrCopyAll");
+    if(cp) cp.addEventListener("click",function(){ var t=$("mrAllTa"); if(!t||!t.value.trim()){ toast("Nothing to copy"); return; } t.select(); try{ document.execCommand("copy"); }catch(_e){} if(navigator.clipboard) navigator.clipboard.writeText(t.value).catch(function(){}); toast("Copied \u2014 paste into Notability"); });
+  }
+  function mrArchive(mi){
+    var m=mrMeetings[mi]; if(!m) return;
+    var id="m_"+uid();
+    var rec={ id:id, source:"granola", title:m.note.title||"Untitled meeting", date:m.note.date||todayISO(),
+      url:m.note.url||"", granola_id:m.note.id||"", my_notes:"", summary:m.note.summary||"",
+      missed:mrKept(m).map(function(it){ return { task:it.text, context:it.context||"", list:"", date:"" }; }),
+      waiting:[], decisions:[], ingested_at:new Date().toISOString() };
+    try{ db.collection("meetings").doc(id).set(rec); toast("Archived to the Brain"); }catch(e){ console.warn("mrArchive",e); toast("Archive failed"); }
+  }
+
   function commitCard(note, res, doneCb){
     if(!res){ toast("Nothing to commit"); return; }
     var mtg=note.title||"Untitled meeting", when=note.date||todayISO();
@@ -3083,6 +3134,17 @@ var DailyOS = (function(){
     document.querySelectorAll(".bsub").forEach(function(b){ b.addEventListener("click",function(){ switchBrainSub(b.getAttribute("data-bsub")); }); });
     var bia=$("biAdd"); if(bia) bia.addEventListener("click",addBrainItem);
     var bit=$("biText"); if(bit) bit.addEventListener("keyup",function(e){ if(e.key==="Enter") addBrainItem(); });
+    var bres=$("dxBatchResults");
+    if(bres) bres.addEventListener("click",function(e){
+      var t=e.target;
+      var arch=t.getAttribute&&t.getAttribute("data-mrarch");
+      var oth=t.getAttribute&&t.getAttribute("data-others");
+      if(arch!=null&&arch!==""){ mrArchive(+arch); return; }
+      if(oth!=null&&oth!==""){ var m=mrMeetings[+oth]; if(m){ m.showOthers=!m.showOthers; mrRender(); } return; }
+      var row=t.closest&&t.closest(".mr-row");
+      if(row){ var mi=+row.getAttribute("data-mi"), ii=+row.getAttribute("data-ii");
+        var mm=mrMeetings[mi]; if(mm&&mm.items[ii]){ mm.items[ii].excluded=!mm.items[ii].excluded; mrRender(); } }
+    });
     var brl=$("brainRefList"); if(brl) brl.addEventListener("click",function(e){ var t=e.target;
       var pp=t.getAttribute&&t.getAttribute("data-promo-proj"); var pd=t.getAttribute&&t.getAttribute("data-promo-dec"); var dl=t.getAttribute&&t.getAttribute("data-bidel");
       if(pp) promoteToProject(pp); else if(pd) promoteToDecision(pd); else if(dl) delBrainItem(dl); });
