@@ -18,9 +18,9 @@
 <style>
   :root{
     --teal:#159AA6; --teal-deep:#0A5A63; --teal-lt:#54C4CE; --ink:#E9EEF0; --ink-dark:#0A1011;
-    --paper:#0F1618; --card:#16201F; --surface2:#1E2A28;
+    --paper:#152023; --card:#1C2A2B; --surface2:#243232;
     --warm:#93A0A6; --warm-lt:#5E6A70; --amber:#E3AE43; --amber-bg:rgba(227,174,67,.12);
-    --input:#93A0A6; --input-bg:#131C1B; --line:rgba(120,210,210,.11); --hair:rgba(120,210,210,.07); --q1:#E8734E;
+    --input:#93A0A6; --input-bg:#18262A; --line:rgba(120,210,210,.13); --hair:rgba(120,210,210,.08); --q1:#E8734E;
     --ok:#4FB07E; --err:#FB7A80; --gold-tx:#E3AE43; --purple-tx:#C07AD0;
     --amber-2:#FFAC27; --amber-lt:#F6CD80; --purple:#C07AD0; --green:#8FBF2E; --red:#FB5058;
   }
@@ -283,12 +283,12 @@
 
   /* =================== COMMAND CONSOLE REDESIGN =================== */
   :root{
-    --paper:#0F1618; --card:#16201F; --line:rgba(120,210,210,.11); --hair:rgba(120,210,210,.07); --ink:#E9EEF0;
+    --paper:#152023; --card:#1C2A2B; --line:rgba(120,210,210,.13); --hair:rgba(120,210,210,.08); --ink:#E9EEF0;
     --teal:#159AA6; --teal-deep:#0A5A63; --warm:#93A0A6; --warm-lt:#5E6A70;
     --amber:#E3AE43; --amber-bg:rgba(227,174,67,.12);
     --gold:#E3AE43; --gold-tx:#E3AE43; --purple:#C07AD0; --purple-tx:#C07AD0;
     --green:#8FBF2E; --red:#FB5058; --input:#93A0A6;
-    --teal-lt:#54C4CE; --ink-dark:#0A1011; --surface2:#1E2A28; --amber-2:#FFAC27; --amber-lt:#F6CD80; --q1:#E8734E; --ok:#4FB07E; --err:#FB7A80;
+    --teal-lt:#54C4CE; --ink-dark:#0A1011; --surface2:#243232; --amber-2:#FFAC27; --amber-lt:#F6CD80; --q1:#E8734E; --ok:#4FB07E; --err:#FB7A80;
   }
   @keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.35}}
   body{ background:var(--paper); background-image:radial-gradient(1200px 480px at 78% -8%, rgba(21,154,166,.10), transparent 60%); }
@@ -442,6 +442,47 @@
   .tp-b.done.on{ background:var(--green); border-color:var(--green); color:#fff; }
   .tp-bar{ display:flex; justify-content:flex-end; padding-top:10px; }
 
+  /* ===== kanban board ===== */
+  .kb-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 12px;flex-wrap:wrap}
+  .kb-top-l{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .kb-title{font-family:'Fraunces',serif;font-size:20px;font-weight:500;color:var(--ink)}
+  .kb-legend{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--warm-lt);display:flex;align-items:center;gap:6px}
+  .kb-top-r{display:flex;align-items:center;gap:8px}
+  .kb-board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;align-items:flex-start}
+  .kb-col{flex:0 0 268px;min-width:268px;background:var(--card);border:1px solid var(--hair);border-radius:6px;display:flex;flex-direction:column}
+  .kb-col.drag-over{border-color:var(--teal);background:var(--surface2)}
+  .kb-chd{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--hair)}
+  .kb-cname{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--warm);flex:1;min-width:0}
+  .kb-cn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal-lt)}
+  .kb-cadd{border:0;background:none;color:var(--warm-lt);cursor:pointer;font-size:15px;line-height:1;padding:0 3px}
+  .kb-cadd:hover{color:var(--teal-lt)}
+  .kb-cbody{padding:10px;display:flex;flex-direction:column;gap:9px;min-height:70px}
+  .kb-empty{font-size:11.5px;color:var(--warm-lt);font-style:italic;padding:8px 4px}
+  .kb-card{background:var(--surface2);border:1px solid var(--hair);border-left:3px solid var(--warm-lt);border-radius:5px;padding:11px 12px;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+  .kb-ghost{position:fixed;z-index:9999;pointer-events:none;margin:0;opacity:.96;transform:rotate(1.5deg);box-shadow:0 14px 30px rgba(0,0,0,.45)}
+  body.kb-dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
+  .kb-card:active{cursor:grabbing}
+  .kb-card.dragging{opacity:.4}
+  .kb-card.d-high{border-left-color:var(--green)} .kb-card.d-medium{border-left-color:var(--amber)} .kb-card.d-low{border-left-color:var(--teal-lt)}
+  .kb-card.is-done .kb-name{text-decoration:line-through;text-decoration-color:var(--warm-lt)}
+  .kb-card.is-done{opacity:.6}
+  .kb-name{font-family:'Fraunces',serif;font-size:14.5px;font-weight:500;color:var(--ink);line-height:1.3}
+  .kb-meta{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.03em;color:var(--warm);margin-top:5px;line-height:1.5}
+  .kb-blk{color:var(--red)}
+  .kb-foot{display:flex;align-items:center;gap:4px;margin-top:9px;padding-top:8px;border-top:1px solid var(--hair)}
+  .kb-nudge{border:1px solid var(--line);background:none;color:var(--warm-lt);border-radius:3px;cursor:pointer;font-size:11px;line-height:1;padding:3px 7px}
+  .kb-nudge:hover{color:var(--teal-lt);border-color:var(--teal)}
+  .kb-nudge[disabled]{opacity:.3;cursor:default}
+  .kb-fspace{flex:1}
+  .kb-act{border:0;background:none;color:var(--warm-lt);cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.05em;padding:2px 5px}
+  .kb-act:hover{color:var(--teal-lt)} .kb-act.danger:hover{color:var(--red)}
+  .kb-sed-h{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--warm);margin-bottom:10px}
+  .kb-sed-row{display:flex;align-items:center;gap:7px;padding:6px 0}
+  .kb-sed-row input{flex:1;font-family:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:var(--input-bg);color:var(--ink)}
+  .kb-sed-add{display:flex;gap:8px;margin-top:10px}
+  .kb-sed-add input{flex:1;font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--input-bg);color:var(--ink)}
+
+  /* ===== kanban end ===== */
   /* ===== monday processor ===== */
   .mon-drop{border:1.5px dashed var(--line);border-radius:6px;padding:26px;text-align:center;cursor:pointer;transition:border-color .15s}
   .mon-drop:hover,.mon-drop.over{border-color:var(--teal)}
@@ -514,7 +555,7 @@
   .dm-v{ font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; color:var(--ink); line-height:1; }
   .dm-v.gold{ color:var(--amber); }
   .dm-s{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--warm-lt); margin-top:5px; letter-spacing:.06em; }
-  .dash-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .dash-cards{ display:grid; grid-template-columns:1fr; gap:16px; }
   @media(max-width:900px){ .dash-cards{ grid-template-columns:1fr; } .dash-metrics{ grid-template-columns:repeat(2,1fr); } }
   .dash-card{ background:var(--card); border:1px solid var(--hair); border-radius:6px; padding:18px 20px; }
   .dash-card-hd{ display:flex; align-items:center; gap:9px; padding-bottom:11px; margin-bottom:6px; border-bottom:1px solid var(--hair); }
@@ -565,6 +606,33 @@
   .proj-meta{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--warm); margin-top:6px; }
   .proj-ov{ font-size:13px; line-height:1.5; color:var(--ink); margin-top:9px; white-space:pre-wrap; }
   .proj-acts{ display:flex; gap:8px; margin-top:12px; }
+  .pm-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .pm-legend{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--warm-lt);display:flex;align-items:center;gap:6px}
+  .pm-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:8px}
+  .pm-dot.d-high{background:var(--green)} .pm-dot.d-medium{background:var(--amber)} .pm-dot.d-low{background:var(--teal-lt)}
+  .pm-group{margin-bottom:22px}
+  .pm-ghd{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--warm);padding-bottom:8px;margin-bottom:2px;border-bottom:1px solid var(--hair)}
+  .pm-gn{color:var(--teal-lt);margin-left:4px}
+  .pm-row{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--hair)}
+  .pm-row:last-child{border-bottom:0}
+  .pm-bar{width:3px;align-self:stretch;border-radius:2px;flex:0 0 auto;min-height:34px}
+  .pm-row.d-high .pm-bar{background:var(--green)} .pm-row.d-medium .pm-bar{background:var(--amber)} .pm-row.d-low .pm-bar{background:var(--teal-lt)}
+  .pm-row.is-done{opacity:.5} .pm-row.is-done .pm-name{text-decoration:line-through;text-decoration-color:var(--warm-lt)}
+  .pm-main{flex:1;min-width:0}
+  .pm-name{font-family:'Fraunces',serif;font-size:16px;font-weight:500;color:var(--ink);line-height:1.3}
+  .pm-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.03em;color:var(--warm);margin-top:5px}
+  .pm-sep{color:var(--warm-lt)}
+  .pm-blk{color:var(--red)} .pm-ok{color:var(--green)}
+  .pm-ov{font-size:12.5px;line-height:1.5;color:var(--warm);margin-top:6px;white-space:pre-wrap}
+  .pm-side{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+  .pm-prio{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--warm-lt)}
+  .pm-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.04em;background:none;border:1px solid var(--line);border-radius:3px;color:var(--warm);padding:4px 9px;cursor:pointer}
+  .pm-btn:hover{color:var(--teal-lt);border-color:var(--teal)}
+  .pm-btn.danger:hover{color:var(--red);border-color:var(--red)}
+  .nb-wrap{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+  .nb-h{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal-lt);margin-bottom:5px}
+  .nb-ta{width:100%;min-height:70px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.7;padding:12px;border:1px solid var(--line);border-radius:4px;background:var(--input-bg);color:var(--ink);resize:vertical;overflow:hidden}
+  .nb-acts{display:flex;gap:8px;margin-top:9px;justify-content:flex-end}
   .proj-done-hd{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--warm-lt); margin:26px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--hair); }
   .proj-card.done{ opacity:.55; border-left-color:var(--warm-lt); }
   .proj-card.done .proj-name{ text-decoration:line-through; text-decoration-color:var(--warm-lt); }
@@ -626,12 +694,8 @@
   </header>
   <nav class="cc-nav fade" id="tabnav" role="tablist">
     <button class="tab active" data-view="dashboard" role="tab">Dashboard</button>
-    <button class="tab" data-view="projects" role="tab">Projects <span class="cbadge cb-teal" id="cb-projects">0</span></button>
-    <button class="tab" data-view="monday" role="tab">Monday</button>
-    <button class="tab" data-view="capture" role="tab">Reconcile</button>
-    <button class="tab" data-view="loops" role="tab">Open Loops <span class="cbadge cb-teal" id="cb-loops">0</span></button>
-    <button class="tab" data-view="waiting" role="tab">Waiting On <span class="cbadge cb-gold" id="cb-waiting">0</span></button>
-    <button class="tab" data-view="decisions" role="tab">Decisions <span class="cbadge cb-purple" id="cb-decisions">0</span></button>
+    <button class="tab" data-view="monday" role="tab">Notability</button>
+    <button class="tab" data-view="capture" role="tab">Meetings</button>
     <button class="tab" data-view="brain" role="tab">Brain</button>
     <div class="cc-navstat">Claude gathers · you decide</div>
   </nav>
@@ -648,82 +712,22 @@
         <div class="dm"><div class="dm-l">ACTIVE LOCKS</div><div class="dm-v" id="d-locks">—</div><div class="dm-s" id="d-locksVol">—</div></div>
       </div>
     </div>
-    <section id="tab-morning" class="morning-scope">
-  <div class="m-wrap" style="max-width:none;padding:0 0 22px">
-    <div class="m-head">
-      <div>
-        <div class="m-eyebrow">Boyd Consulting Group · Executive OS</div>
-        <h2 class="m-title">Morning</h2>
-      </div>
-      <div class="m-headr">
-        <div class="m-greet" id="m-greet">Good morning.</div>
-        <div class="m-date" id="m-date">—</div>
-        <button class="m-btn" id="m-gen">Generate brief</button>
+    <div class="kb-top">
+      <div class="kb-top-l"><span class="kb-title">Projects</span><span class="kb-legend"><i class="pm-dot d-high"></i>high<i class="pm-dot d-medium"></i>medium<i class="pm-dot d-low"></i>low</span></div>
+      <div class="kb-top-r">
+        <button class="go small" id="pjToggle" type="button">+ New project</button>
+        <button class="go alt small" id="kbStagesBtn" type="button">Edit stages</button>
       </div>
     </div>
-
-    <div class="m-hero">
-      <div class="m-next-k">What to do next</div>
-      <p class="m-next" id="m-next"><em>Reading your day…</em></p>
-      <div class="m-top3" id="m-top3"></div>
+    <div class="dx-card" id="kbStagesWrap" style="display:none;margin-bottom:14px">
+      <div class="kb-sed-h">Stages — rename, reorder, add or remove</div>
+      <div id="kbStageEdit"></div>
+      <div class="kb-sed-add"><input type="text" id="kbNewStage" placeholder="New stage name…"><button class="go small" id="kbAddStage" type="button">Add stage</button></div>
     </div>
-
-    <div class="m-grid" style="grid-template-columns:1fr">
-      <div class="m-card">
-        <h3 class="m-h3">The Brief</h3>
-        <p class="m-sub" id="m-briefSub">Generated from your Executive OS.</p>
-        <div id="m-brief"></div>
-      </div>
-      <div style="display:none">
-        <div class="m-card">
-          <h3 class="m-h3">Active Projects</h3>
-          <p class="m-sub">At a glance — status and what's moving.</p>
-          <div id="m-projects"></div>
-        </div>
-        <div class="m-card" style="margin-top:20px">
-          <h3 class="m-h3">Open Loops</h3>
-          <p class="m-sub">Waiting-on and unfinished threads.</p>
-          <div id="m-loops"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="m-card" style="margin-top:20px">
-      <h3 class="m-h3">Parking Lot</h3>
-      <p class="m-sub">Capture it and move on. Writes to your Brain when live.</p>
-      <div class="m-capbar">
-        <input id="m-capInput" placeholder="Capture a thought, task, or follow-up…" />
-        <button class="m-btn" id="m-capBtn">Add</button>
-      </div>
-      <div class="m-caplist" id="m-caplist"></div>
-    </div>
-
-    <div class="m-foot"><span id="m-src">Source: —</span></div>
-  </div>
-</section>
-    <div class="dash-cards">
-      <div class="dash-card">
-        <div class="dash-card-hd"><span class="sn">◆</span><span class="st">Outstanding Projects</span><button class="go alt small" data-view-jump="projects" style="margin-left:auto">Manage →</button></div>
-        <div id="dashProjects" class="bullets"></div>
-      </div>
-      <div class="dash-card">
-        <div class="dash-card-hd"><span class="sn" style="color:var(--purple)">◆</span><span class="st">Decisions Not Made</span></div>
-        <div id="dashDecisions" class="bullets"></div>
-        <div class="dash-add"><input type="text" id="dashDecInput" placeholder="Add a decision on the table…"><button class="go small" id="dashDecAdd">Add</button></div>
-      </div>
-      <div class="dash-card">
-        <div class="dash-card-hd"><span class="sn" style="color:var(--teal-lt)">◆</span><span class="st">Open Loops</span><button class="go alt small" data-view-jump="loops" style="margin-left:auto">All →</button></div>
-        <div id="dashLoops" class="bullets"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="view-projects" class="view">
-    <div class="dash-lede">Projects. <em>Every initiative, one place.</em></div>
-    <div class="dx-card" style="margin-bottom:18px">
+    <div class="dx-card" id="pjFormWrap" style="margin-bottom:14px;display:none">
       <div class="proj-form">
         <input type="text" id="pjName" placeholder="Project / feature name">
-        <select id="pjStatus"><option value="active">Active</option><option value="waiting">Waiting</option><option value="done">Done</option></select>
+        <select id="pjStage" title="Stage"></select>
         <select id="pjPriority" title="Priority"><option value="high">High priority</option><option value="medium" selected>Medium</option><option value="low">Low priority</option></select>
         <input type="date" id="pjEst" title="Estimated completion">
         <input type="text" id="pjWaiting" placeholder="Waiting on…">
@@ -732,7 +736,7 @@
       <textarea id="pjOverview" placeholder="Overview · context · notes (optional)"></textarea>
       <div class="proj-deps"><label>Depends on — these must finish first (⌘/Ctrl-click for several)</label><select id="pjDeps" multiple size="4"></select></div>
     </div>
-    <div id="projList"></div>
+    <div class="kb-board" id="kbBoard"></div>
   </div>
 
   <div id="view-weekly" class="view">
@@ -963,8 +967,8 @@
 
   <!-- ===== DAILY EXECUTION VIEWS ===== -->
   <div id="view-capture" class="view">
-    <div class="dx-lede">Reconcile. <em>Surface what you missed.</em></div>
-    <div class="dx-sub">Check the meetings you want. Hit Reconcile. Claude diffs each one and surfaces only the delta — the commitments you made but didn't write down. You never need to read the notes.</div>
+    <div class="dx-lede">Meeting Reconciliation. <em>Straight into Notability.</em></div>
+    <div class="dx-sub">Check the meetings you want. Claude diffs each one and surfaces only the delta — the commitments you made but didn't write down. Each meeting gives you a copy-paste block for your Notability to-do list; decisions archive to the Brain on commit.</div>
 
     <div class="dx-card">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
@@ -2604,60 +2608,100 @@ var DailyOS = (function(){
   function prioColor(pr){ return pr==="high"?"var(--green)":pr==="low"?"var(--teal-lt)":"var(--amber)"; }
   function prioRank(pr){ return pr==="high"?0:pr==="low"?2:1; }
   function projById(id){ return projects.filter(function(x){return x.id===id;})[0]||null; }
-  function blockersOf(p){ return (p.dependsOn||[]).map(projById).filter(function(x){ return x && x.status!=="done"; }); }
+  function blockersOf(p){ return (p.dependsOn||[]).map(projById).filter(function(x){ return x && !isDoneProj(x); }); }
   function refreshDepOptions(selected, excludeId){
     var sel=$("pjDeps"); if(!sel) return;
     var cur = selected!=null ? selected : Array.prototype.map.call(sel.selectedOptions||[], function(o){return o.value;});
     var opts=projects.filter(function(p){ return p.id!==excludeId; });
     sel.innerHTML = opts.length ? opts.map(function(p){ return '<option value="'+esc2(p.id)+'"'+(cur.indexOf(p.id)>=0?" selected":"")+'>'+esc2(p.name)+(p.status==="done"?" \u2713":"")+'</option>'; }).join("") : '<option disabled>Add another project first</option>';
   }
-  function renderProjects(){
-    var openp=projects.filter(function(p){ return p.status!=="done"; }).sort(function(a,b){ return prioRank(a.priority)-prioRank(b.priority); });
-    var cb=$("cb-projects"); if(cb) cb.textContent=openp.length;
-    var dh=$("dashProjects");
-    if(dh){
-      if(!openp.length){ dh.innerHTML='<div class="bullet empty">No open projects. Add one in Projects.</div>'; }
-      else dh.innerHTML=openp.map(function(p){
-        var bits=[]; if(p.est) bits.push("est "+fmtDate(p.est)); if(p.waitingOn) bits.push("waiting on "+p.waitingOn);
-        var blk=blockersOf(p);
-        return '<div class="bullet link" data-open="'+esc2(p.id)+'"><span><b style="color:'+prioColor(p.priority)+'">'+esc2(p.name)+'</b>'+(blk.length?' <span class="dep-flag">\u25cf blocked</span>':'')+(bits.length?' <span class="dim">\u2014 '+esc2(bits.join(" \u00b7 "))+'</span>':'')+'</span></div>';
-      }).join("");
-    }
-    var host=$("projList"); if(!host) return;
-    if(!projects.length){ host.innerHTML='<div class="dx-empty" style="padding:22px;color:var(--warm-lt)">No projects yet. Add your first above.</div>'; return; }
-    refreshDepOptions(null, editingProj||"");
-    function cardHtml(p){
-      var meta=[]; if(p.est) meta.push("est "+fmtDate(p.est)); if(p.waitingOn) meta.push("waiting on "+esc2(p.waitingOn));
-      var blk=blockersOf(p);
-      var depLine = blk.length ? '<div class="proj-blocked">\u25cf Blocked by '+blk.map(function(x){return esc2(x.name);}).join(", ")+'</div>' : ((p.dependsOn&&p.dependsOn.length)?'<div class="proj-unblocked">\u2713 Prerequisites complete</div>':'');
-      return '<div class="proj-card'+(p.status==="done"?" done":"")+'">'
-        +'<div class="proj-top"><span class="proj-name">'+esc2(p.name)+'</span><span class="proj-status st-'+esc2(p.status)+'">'+esc2(p.status)+'</span>'+(p.status==="done"?'':'<span class="proj-prio pr-'+esc2(p.priority||"medium")+'">'+esc2(p.priority||"medium")+'</span>')+'</div>'
-        +depLine
-        +(meta.length?'<div class="proj-meta">'+meta.join(" \u00b7 ")+'</div>':'')
-        +(p.overview?'<div class="proj-ov">'+esc2(p.overview)+'</div>':'')
-        +'<div class="proj-acts"><button class="go alt small" data-edit="'+esc2(p.id)+'">Edit</button><button class="go alt small" data-del="'+esc2(p.id)+'">Delete</button></div>'
-        +'</div>';
-    }
-    var order={active:0,waiting:1};
-    var act=projects.filter(function(p){return p.status!=="done";}).sort(function(a,b){ return (order[a.status]||0)-(order[b.status]||0) || prioRank(a.priority)-prioRank(b.priority); });
-    var done=projects.filter(function(p){return p.status==="done";});
-    var html=act.map(cardHtml).join("");
-    if(done.length){ html+='<div class="proj-done-hd">Done \u00b7 '+done.length+'</div>'+done.map(cardHtml).join(""); }
-    host.innerHTML=html;
+  /* ===== kanban stages ===== */
+  var DEFAULT_STAGES=[{id:"backlog",name:"Backlog"},{id:"inprogress",name:"In Progress"},{id:"waiting",name:"Waiting"},{id:"review",name:"Review"},{id:"done",name:"Done"}];
+  var stages=DEFAULT_STAGES.slice();
+  function bdoc(){ return db.collection("settings").doc("board"); }
+  function saveStages(){ try{ bdoc().set({stages:stages},{merge:true}); }catch(e){ console.warn("saveStages",e); } }
+  function stageIds(){ return stages.map(function(x){return x.id;}); }
+  function stageOf(p){
+    if(p.stage && stageIds().indexOf(p.stage)>=0) return p.stage;
+    var m={active:"inprogress",waiting:"waiting",done:"done"};
+    var guess=m[p.status]||"";
+    if(guess && stageIds().indexOf(guess)>=0) return guess;
+    return stages.length?stages[0].id:"backlog";
   }
+  function isDoneProj(p){ return stageOf(p)==="done" || p.status==="done"; }
+  function slug(n){ return String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"").slice(0,18)||("s"+Date.now().toString(36)); }
+  function refreshStageSelect(){
+    var sel=$("pjStage"); if(!sel) return;
+    var cur=sel.value;
+    sel.innerHTML=stages.map(function(st){ return '<option value="'+esc2(st.id)+'">'+esc2(st.name)+'</option>'; }).join("");
+    if(cur && stageIds().indexOf(cur)>=0) sel.value=cur;
+  }
+  function renderStageEditor(){
+    var host=$("kbStageEdit"); if(!host) return;
+    host.innerHTML=stages.map(function(st,i){
+      return '<div class="kb-sed-row"><input type="text" value="'+esc2(st.name)+'" data-srename="'+esc2(st.id)+'">'
+        +'<button class="kb-nudge" data-sup="'+i+'"'+(i===0?" disabled":"")+'>\u2191</button>'
+        +'<button class="kb-nudge" data-sdn="'+i+'"'+(i===stages.length-1?" disabled":"")+'>\u2193</button>'
+        +'<button class="kb-act danger" data-sdel="'+esc2(st.id)+'">remove</button></div>';
+    }).join("");
+  }
+
+  /* ===== kanban render ===== */
+  function renderProjects(){
+    refreshStageSelect(); renderStageEditor();
+    var cb=$("cb-projects"); if(cb) cb.textContent=projects.filter(function(p){return !isDoneProj(p);}).length;
+    var board=$("kbBoard"); if(!board) return;
+    refreshDepOptions(null, editingProj||"");
+    var ids=stageIds();
+    board.innerHTML=stages.map(function(st){
+      var inCol=projects.filter(function(p){ return stageOf(p)===st.id; }).sort(function(a,b){ return prioRank(a.priority)-prioRank(b.priority); });
+      var cards=inCol.length ? inCol.map(function(p){
+        var pr=p.priority||"medium", si=ids.indexOf(stageOf(p));
+        var meta=[];
+        if(p.est) meta.push("est "+fmtDate(p.est));
+        if(p.waitingOn) meta.push("waiting on "+esc2(p.waitingOn));
+        var blk=blockersOf(p);
+        if(blk.length) meta.push('<span class="kb-blk">blocked by '+blk.map(function(x){return esc2(x.name);}).join(", ")+'</span>');
+        return '<div class="kb-card d-'+esc2(pr)+(isDoneProj(p)?" is-done":"")+'" data-pid="'+esc2(p.id)+'">'
+          +'<div class="kb-name">'+esc2(p.name)+'</div>'
+          +(meta.length?'<div class="kb-meta">'+meta.join(" \u00b7 ")+'</div>':'')
+          +'<div class="kb-foot">'
+            +'<button class="kb-nudge" data-mvl="'+esc2(p.id)+'"'+(si<=0?" disabled":"")+' title="Back a stage">\u2039</button>'
+            +'<button class="kb-nudge" data-mvr="'+esc2(p.id)+'"'+(si>=ids.length-1?" disabled":"")+' title="Forward a stage">\u203a</button>'
+            +'<span class="kb-fspace"></span>'
+            +'<button class="kb-act" data-edit="'+esc2(p.id)+'">edit</button>'
+            +'<button class="kb-act danger" data-del="'+esc2(p.id)+'">\u2715</button>'
+          +'</div></div>';
+      }).join("") : '<div class="kb-empty">Nothing here</div>';
+      return '<div class="kb-col" data-stage="'+esc2(st.id)+'">'
+        +'<div class="kb-chd"><span class="kb-cname">'+esc2(st.name)+'</span><span class="kb-cn">'+inCol.length+'</span><button class="kb-cadd" data-addto="'+esc2(st.id)+'" title="Add here">+</button></div>'
+        +'<div class="kb-cbody" data-stage="'+esc2(st.id)+'">'+cards+'</div></div>';
+    }).join("");
+  }
+  function moveProject(id,dir){
+    var p=projects.filter(function(x){return x.id===id;})[0]; if(!p) return;
+    var ids=stageIds(), i=ids.indexOf(stageOf(p)), n=i+dir;
+    if(n<0||n>=ids.length) return;
+    setProjectStage(id, ids[n]);
+  }
+  function setProjectStage(id,stage){
+    try{ pdoc(id).set({stage:stage, status:(stage==="done"?"done":"active"), updated_at:new Date().toISOString()},{merge:true}); }
+    catch(e){ console.warn("setStage",e); }
+  }
+
   function saveProject(){
     var name=($("pjName").value||"").trim(); if(!name){ toast("Name the project"); return; }
     var id=editingProj||("p_"+uid());
-    var rec={ id:id, name:name, status:$("pjStatus").value, priority:$("pjPriority").value, est:$("pjEst").value||"", waitingOn:($("pjWaiting").value||"").trim(), overview:($("pjOverview").value||"").trim(), dependsOn:($("pjDeps")?Array.prototype.map.call($("pjDeps").selectedOptions,function(o){return o.value;}):[]), updated_at:new Date().toISOString() };
+    var rec={ id:id, name:name, stage:$("pjStage").value, status:($("pjStage").value==="done"?"done":"active"), priority:$("pjPriority").value, est:$("pjEst").value||"", waitingOn:($("pjWaiting").value||"").trim(), overview:($("pjOverview").value||"").trim(), dependsOn:($("pjDeps")?Array.prototype.map.call($("pjDeps").selectedOptions,function(o){return o.value;}):[]), updated_at:new Date().toISOString() };
     if(!editingProj) rec.created_at=new Date().toISOString();
     try{ pdoc(id).set(rec,{merge:true}); }catch(e){ console.warn("project save",e); }
-    editingProj=""; $("pjName").value=""; $("pjEst").value=""; $("pjWaiting").value=""; $("pjOverview").value=""; $("pjStatus").value="active"; $("pjPriority").value="medium"; refreshDepOptions([], ""); $("pjAdd").textContent="Add project";
+    editingProj=""; var _w=$("pjFormWrap"); if(_w) _w.style.display="none"; var _t=$("pjToggle"); if(_t) _t.textContent="+ New project"; $("pjName").value=""; $("pjEst").value=""; $("pjWaiting").value=""; $("pjOverview").value=""; if($("pjStage")) $("pjStage").value=(stages[0]&&stages[0].id)||"backlog"; $("pjPriority").value="medium"; refreshDepOptions([], ""); $("pjAdd").textContent="Add project";
     toast("Project saved");
   }
   function editProject(id){
     var p=projects.filter(function(x){ return x.id===id; })[0]; if(!p) return;
-    editingProj=id; $("pjName").value=p.name||""; $("pjStatus").value=p.status||"active"; $("pjPriority").value=p.priority||"medium"; $("pjEst").value=p.est||""; $("pjWaiting").value=p.waitingOn||""; $("pjOverview").value=p.overview||""; refreshDepOptions(p.dependsOn||[], id);
-    $("pjAdd").textContent="Save changes"; switchView("projects");
+    editingProj=id; var _w2=$("pjFormWrap"); if(_w2) _w2.style.display="block"; var _t2=$("pjToggle"); if(_t2) _t2.textContent="Close form"; $("pjName").value=p.name||""; if($("pjStage")) $("pjStage").value=stageOf(p); $("pjPriority").value=p.priority||"medium"; $("pjEst").value=p.est||""; $("pjWaiting").value=p.waitingOn||""; $("pjOverview").value=p.overview||""; refreshDepOptions(p.dependsOn||[], id);
+    $("pjAdd").textContent="Save changes"; switchView("dashboard");
     setTimeout(function(){ $("pjName").scrollIntoView({behavior:"smooth",block:"center"}); },60);
   }
   function deleteProject(id){ try{ pdoc(id).delete(); }catch(e){ console.warn("project delete",e); } toast("Project deleted"); }
@@ -2718,8 +2762,8 @@ var DailyOS = (function(){
   function delBrainItem(id){ try{ bidoc(id).delete(); }catch(e){ console.warn("bi del",e); } toast("Removed"); }
   function promoteToProject(id){
     var it=brainItems.filter(function(x){return x.id===id;})[0]; if(!it) return;
-    editingProj=""; switchView("projects");
-    $("pjName").value=it.text; $("pjStatus").value="active"; $("pjPriority").value="medium"; $("pjEst").value=""; $("pjWaiting").value="";
+    editingProj=""; switchView("dashboard");
+    $("pjName").value=it.text; if($("pjStage")) $("pjStage").value=(stages[0]&&stages[0].id)||"backlog"; $("pjPriority").value="medium"; $("pjEst").value=""; $("pjWaiting").value="";
     $("pjOverview").value=it.note||""; refreshDepOptions([], ""); $("pjAdd").textContent="Add project";
     setTimeout(function(){ $("pjName").scrollIntoView({behavior:"smooth",block:"center"}); },60);
     toast("Sent to Projects \u2014 review & save");
@@ -2927,8 +2971,8 @@ var DailyOS = (function(){
     var views=document.querySelectorAll(".view");
     for(var j=0;j<views.length;j++) views[j].classList.toggle("active", views[j].id==="view-"+name);
     var wh=$("weekHead"); if(wh) wh.style.display=(name==="weekly")?"block":"none";
-    if(name==="dashboard"){ syncDashScore(); renderDashLoops(); renderDashDecisions(); renderProjects(); try{ if(window.MorningTab) MorningTab.show(); }catch(_e){} }
-    if(name==="projects") renderProjects();
+    if(name==="dashboard"){ syncDashScore(); renderDashLoops(); renderDashDecisions(); renderProjects(); }
+
     if(name==="brain") switchBrainSub(brainKind);
   }
 
@@ -3082,8 +3126,21 @@ var DailyOS = (function(){
       fDiv.appendChild(fBd); buckets.appendChild(fDiv);
     }
     card.appendChild(buckets);
+    var nb=document.createElement("div"); nb.className="nb-wrap";
+    var nbh=document.createElement("div"); nbh.className="nb-h"; nbh.textContent="For Notability"; nb.appendChild(nbh);
+    var nbHint=document.createElement("div"); nbHint.className="dx-hint"; nbHint.textContent="Action items and waiting-on, formatted for your to-do list. Discard anything above first, then copy."; nb.appendChild(nbHint);
+    var nbTa=document.createElement("textarea"); nbTa.className="nb-ta"; nbTa.spellcheck=false; nbTa.value=notabilityBlock(note,tmpPending); nb.appendChild(nbTa);
+    nbTa.addEventListener("input",function(){ monAutosize(nbTa); });
+    var nbBar=document.createElement("div"); nbBar.className="nb-acts";
+    var nbRe=document.createElement("button"); nbRe.className="go alt small"; nbRe.type="button"; nbRe.textContent="Refresh";
+    nbRe.addEventListener("click",function(){ nbTa.value=notabilityBlock(note,tmpPending); monAutosize(nbTa); });
+    var nbCopy=document.createElement("button"); nbCopy.className="go small"; nbCopy.type="button"; nbCopy.textContent="Copy for Notability";
+    nbCopy.addEventListener("click",function(){ if(!nbTa.value.trim()){ toast("Nothing to copy"); return; } nbTa.select(); try{ document.execCommand("copy"); }catch(_e){} if(navigator.clipboard){ navigator.clipboard.writeText(nbTa.value).catch(function(){}); } toast("Copied for Notability"); });
+    nbBar.appendChild(nbRe); nbBar.appendChild(nbCopy); nb.appendChild(nbBar);
+    card.appendChild(nb);
+    requestAnimationFrame(function(){ monAutosize(nbTa); });
     var commitBar=document.createElement("div"); commitBar.style.cssText="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)";
-    var hint=document.createElement("div"); hint.className="dx-hint"; hint.textContent="Route or park each item, then commit."; commitBar.appendChild(hint);
+    var hint=document.createElement("div"); hint.className="dx-hint"; hint.textContent="Commit archives this meeting \u2014 decisions land in the Brain."; commitBar.appendChild(hint);
     var commitBtn=document.createElement("button"); commitBtn.className="go small"; commitBtn.type="button"; commitBtn.textContent="Commit";
     commitBtn.addEventListener("click",function(){
       commitCard(note, tmpPending, function(parked){
@@ -3092,6 +3149,15 @@ var DailyOS = (function(){
     });
     commitBar.appendChild(commitBtn); card.appendChild(commitBar);
     host.appendChild(card);
+  }
+  function notabilityBlock(note,res){
+    if(!res) return "";
+    var lines=[];
+    (res.actionItems||[]).forEach(function(a){ var t=(a.title||"").trim(); if(t) lines.push(t); });
+    (res.waitingOn||[]).forEach(function(w){ if(w.keep===false) return; var who=(w.who||"").trim(), what=(w.what||"").trim(); if(who||what) lines.push("Waiting on "+(who?who:"")+(who&&what?" \u2014 ":"")+(what?what:"")); });
+    if(!lines.length) return "";
+    var hd=(note.title||"Meeting")+(note.date?(" \u2014 "+fmtDate(note.date)):"");
+    return hd+"\n\n"+lines.map(function(t){ return "\u2022  "+t; }).join("\n\n");
   }
   function commitCard(note, res, doneCb){
     if(!res){ toast("Nothing to commit"); return; }
@@ -3198,6 +3264,92 @@ var DailyOS = (function(){
     try { db.collection("meetings").onSnapshot(function(snap){ corpus=snap.docs.map(function(d){return d.data();}); renderBrain(bq?bq.value:""); }, function(err){ console.warn("brain snapshot",err); }); }
     catch(e){ console.warn("brain subscribe",e); }
     var pja=$("pjAdd"); if(pja) pja.addEventListener("click",saveProject);
+    var pjt=$("pjToggle"); if(pjt) pjt.addEventListener("click",function(){ var w=$("pjFormWrap"); if(!w) return; var open=w.style.display!=="none"; w.style.display=open?"none":"block"; pjt.textContent=open?"+ New project":"Close form"; });
+    var kbs=$("kbStagesBtn"); if(kbs) kbs.addEventListener("click",function(){ var w=$("kbStagesWrap"); if(!w) return; var open=w.style.display!=="none"; w.style.display=open?"none":"block"; kbs.textContent=open?"Edit stages":"Done editing"; });
+    var kbAdd=$("kbAddStage"); if(kbAdd) kbAdd.addEventListener("click",function(){ var v=($("kbNewStage").value||"").trim(); if(!v){ toast("Name the stage"); return; } var id=slug(v); if(stageIds().indexOf(id)>=0){ toast("Stage already exists"); return; } stages.push({id:id,name:v}); $("kbNewStage").value=""; saveStages(); renderProjects(); });
+    var kbSed=$("kbStageEdit");
+    if(kbSed){
+      kbSed.addEventListener("click",function(e){
+        var t=e.target, up=t.getAttribute&&t.getAttribute("data-sup"), dn=t.getAttribute&&t.getAttribute("data-sdn"), del=t.getAttribute&&t.getAttribute("data-sdel");
+        if(up!=null&&up!==""){ up=+up; if(up>0){ var a=stages[up-1]; stages[up-1]=stages[up]; stages[up]=a; saveStages(); renderProjects(); } }
+        else if(dn!=null&&dn!==""){ dn=+dn; if(dn<stages.length-1){ var b=stages[dn+1]; stages[dn+1]=stages[dn]; stages[dn]=b; saveStages(); renderProjects(); } }
+        else if(del){ var used=projects.filter(function(p){return stageOf(p)===del;}).length; if(used){ toast("Move its "+used+" project"+(used>1?"s":"")+" out first"); return; } if(stages.length<=1){ toast("Keep at least one stage"); return; } stages=stages.filter(function(x){return x.id!==del;}); saveStages(); renderProjects(); }
+      });
+      kbSed.addEventListener("change",function(e){ var id=e.target.getAttribute&&e.target.getAttribute("data-srename"); if(id){ var v=(e.target.value||"").trim(); if(!v) return; stages.forEach(function(x){ if(x.id===id) x.name=v; }); saveStages(); renderProjects(); } });
+    }
+    var kbB=$("kbBoard");
+    if(kbB){
+      kbB.addEventListener("click",function(e){
+        var t=e.target;
+        var ed=t.getAttribute&&t.getAttribute("data-edit"), dl=t.getAttribute&&t.getAttribute("data-del");
+        var ml=t.getAttribute&&t.getAttribute("data-mvl"), mr=t.getAttribute&&t.getAttribute("data-mvr");
+        var at=t.getAttribute&&t.getAttribute("data-addto");
+        if(ed) editProject(ed);
+        else if(dl) deleteProject(dl);
+        else if(ml) moveProject(ml,-1);
+        else if(mr) moveProject(mr,1);
+        else if(at){ var w=$("pjFormWrap"); if(w){ w.style.display="block"; var pt=$("pjToggle"); if(pt) pt.textContent="Close form"; } if($("pjStage")) $("pjStage").value=at; var nm=$("pjName"); if(nm) nm.focus(); }
+      });
+      var kbDrag=null;
+      function kbClearOver(){ var cs=kbB.querySelectorAll(".kb-col"); for(var i=0;i<cs.length;i++) cs[i].classList.remove("drag-over"); }
+      function kbCleanup(){
+        if(kbDrag){
+          clearTimeout(kbDrag.timer);
+          if(kbDrag.ghost&&kbDrag.ghost.parentNode) kbDrag.ghost.parentNode.removeChild(kbDrag.ghost);
+          if(kbDrag.card) kbDrag.card.classList.remove("dragging");
+        }
+        kbClearOver(); kbDrag=null; document.body.classList.remove("kb-dragging");
+      }
+      function kbColAt(x,y){ var el=document.elementFromPoint(x,y); return (el&&el.closest)?el.closest(".kb-col"):null; }
+      function kbArm(x,y){
+        if(!kbDrag||kbDrag.armed) return;
+        kbDrag.armed=true;
+        var g=kbDrag.card.cloneNode(true);
+        g.className=kbDrag.card.className+" kb-ghost";
+        g.style.width=kbDrag.w+"px"; g.style.left=(x-kbDrag.dx)+"px"; g.style.top=(y-kbDrag.dy)+"px";
+        document.body.appendChild(g); kbDrag.ghost=g;
+        kbDrag.card.classList.add("dragging");
+        document.body.classList.add("kb-dragging");
+        try{ kbB.setPointerCapture(kbDrag.ptr); }catch(_e){}
+      }
+      kbB.addEventListener("pointerdown",function(e){
+        if(e.button!==undefined&&e.button!==0) return;
+        var t=e.target; if(t.closest&&t.closest("button")) return;
+        var c=t.closest&&t.closest(".kb-card"); if(!c) return;
+        var r=c.getBoundingClientRect();
+        kbDrag={ card:c, pid:c.getAttribute("data-pid"), x0:e.clientX, y0:e.clientY,
+                 dx:e.clientX-r.left, dy:e.clientY-r.top, w:r.width, armed:false, ghost:null, timer:null, ptr:e.pointerId };
+        var sx=e.clientX, sy=e.clientY;
+        kbDrag.timer=setTimeout(function(){ kbArm(sx,sy); },170);
+      });
+      kbB.addEventListener("pointermove",function(e){
+        if(!kbDrag) return;
+        var mx=Math.abs(e.clientX-kbDrag.x0), my=Math.abs(e.clientY-kbDrag.y0);
+        if(!kbDrag.armed){
+          if(my>10&&my>mx){ kbCleanup(); return; }
+          if(mx>7||my>7) kbArm(e.clientX,e.clientY);
+          if(!kbDrag||!kbDrag.armed) return;
+        }
+        if(e.cancelable) e.preventDefault();
+        kbDrag.ghost.style.left=(e.clientX-kbDrag.dx)+"px";
+        kbDrag.ghost.style.top=(e.clientY-kbDrag.dy)+"px";
+        kbClearOver(); var col=kbColAt(e.clientX,e.clientY); if(col) col.classList.add("drag-over");
+      });
+      kbB.addEventListener("pointerup",function(e){
+        if(!kbDrag) return;
+        var armed=kbDrag.armed, pid=kbDrag.pid;
+        if(armed){
+          if(kbDrag.ghost) kbDrag.ghost.style.display="none";
+          var col=kbColAt(e.clientX,e.clientY), st=col?col.getAttribute("data-stage"):null;
+          if(pid&&st){ var p=projects.filter(function(x){return x.id===pid;})[0]; if(!p||stageOf(p)!==st) setProjectStage(pid,st); }
+        }
+        kbCleanup();
+      });
+      kbB.addEventListener("pointercancel",function(){ kbCleanup(); });
+      kbB.addEventListener("lostpointercapture",function(){ if(kbDrag&&!kbDrag.armed) kbCleanup(); });
+    }
+    try { bdoc().onSnapshot(function(doc){ var d=doc&&doc.exists?doc.data():null; if(d&&Array.isArray(d.stages)&&d.stages.length) stages=d.stages.filter(function(x){return x&&x.id&&x.name;}); renderProjects(); }, function(err){ console.warn("stages snapshot",err); }); }
+    catch(e){ console.warn("stages subscribe",e); }
     var dda=$("dashDecAdd"); if(dda) dda.addEventListener("click",function(){ var v=($("dashDecInput").value||"").trim(); if(!v){ toast("Type a decision"); return; } dstate.decisions.push({ id:uid(), decision:v, context:"", source:"manual", date:todayISO() }); dsave(); $("dashDecInput").value=""; renderDashDecisions(); toast("Added to Decisions"); });
     var ddi=$("dashDecInput"); if(ddi) ddi.addEventListener("keyup",function(e){ if(e.key==="Enter") $("dashDecAdd").click(); });
     document.querySelectorAll("[data-view-jump]").forEach(function(b){ b.addEventListener("click",function(){ switchView(b.getAttribute("data-view-jump")); }); });
@@ -3216,7 +3368,6 @@ var DailyOS = (function(){
     try { db.collection("brain-items").onSnapshot(function(snap){ brainItems=snap.docs.map(function(d){return d.data();}).filter(function(x){return x&&x.kind;}); renderBrainItems(); }, function(err){ console.warn("brain-items snapshot",err); }); }
     catch(e){ console.warn("brain-items subscribe",e); }
     refreshBrainCatSelect(); seedBrainIfNeeded();
-    try{ if(window.MorningTab) MorningTab.init(); }catch(_e){ console.warn("morning init",_e); }
     var mDrop=$("monDrop"), mFile=$("monFile");
     if(mDrop&&mFile){
       mDrop.addEventListener("click",function(){ mFile.click(); });
